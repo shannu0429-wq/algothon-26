@@ -787,3 +787,117 @@ textarea.form-control {
   color: #fff;
 }
 
+.judge-banner {
+  background: linear-gradient(90deg, #1e1b4b 0%, #0f172a 100%);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 0.3rem 1rem;
+  font-size: 0.8rem;
+  z-index: 1001;
+}
+
+.btn-xs {
+  font-size: 0.74rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  line-height: 1.2;
+}
+
+.simulator-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.simulator-skill-item {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.simulator-skill-item:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.simulator-skill-item.checked {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+}
+
+.simulator-result-box {
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.ats-audit-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.ats-check-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  padding: 0.35rem 0;
+}
+
+.ats-check-icon {
+  color: #10b981;
+  font-size: 0.95rem;
+}
+
+@media print {
+  .site-header, .judge-banner, .dashboard-sidebar, .nav-actions, .hero-buttons, .site-footer, button, a.btn {
+    display: none !important;
+  }
+  .dashboard-layout {
+    display: block !important;
+  }
+  .dashboard-main, .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .panel, .score-display-card, .metric-card {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  .panel-title, .dashboard-title, .score-label {
+    color: #000 !important;
+  }
+  .score-number {
+    color: #4f46e5 !important;
+  }
+}
+

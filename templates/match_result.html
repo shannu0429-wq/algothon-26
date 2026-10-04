@@ -79,7 +79,8 @@
           company: <span style="color: #fff; font-weight: 600;">{{ match.company_name }}</span>
         </p>
       </div>
-      <div style="display: flex; gap: 0.6rem;">
+      <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+        <button type="button" onclick="window.print()" class="btn btn-secondary">🖨️ export match report</button>
         <a href="{{ url_for('matching.job_matcher_view') }}" class="btn btn-secondary">analyze another role</a>
         <a href="{{ url_for('job.jobs_view') }}" class="btn btn-primary">explore all jobs</a>
       </div>
@@ -187,6 +188,36 @@
           {% endif %}
         </div>
 
+        {% if match.missing_skills %}
+          <div class="panel" id="simulator-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">⚡ interactive skill simulator</h3>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 0.85rem;">
+              select missing skills to simulate how acquiring them boosts your compatibility score:
+            </p>
+            <div class="simulator-skills-grid">
+              {% for s in match.missing_skills %}
+                <label class="simulator-skill-item">
+                  <input type="checkbox" class="simulator-checkbox" data-skill="{{ s }}" style="cursor: pointer;">
+                  <span>+ {{ s }}</span>
+                </label>
+              {% endfor %}
+            </div>
+            <div class="simulator-result-box">
+              <div>
+                <div style="font-size: 0.78rem; color: var(--text-dim);">simulated score</div>
+                <div style="font-size: 1.45rem; font-weight: 800; color: #fff;">
+                  <span id="sim-score-val">{{ match.overall_score }}</span>%
+                </div>
+              </div>
+              <div id="sim-diff-badge" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; padding: 0.35rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;">
+                check skills above to simulate boost
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
         {% if match.partial_skills %}
           <div class="panel">
             <div class="panel-header">
@@ -264,4 +295,45 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/matcher.js') }}"></script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const baseScore = parseFloat("{{ match.overall_score }}") || 0;
+  const missingCount = parseInt("{{ match.missing_skills|length }}") || 0;
+  const simVal = document.getElementById("sim-score-val");
+  const simBadge = document.getElementById("sim-diff-badge");
+  const checkboxes = document.querySelectorAll(".simulator-checkbox");
+
+  if (checkboxes.length && simVal && simBadge) {
+    const boostPerSkill = missingCount > 0 ? (35.0 / (missingCount + (parseInt("{{ match.matched_skills|length }}") || 1))) : 5.0;
+
+    checkboxes.forEach((cb) => {
+      cb.addEventListener("change", () => {
+        const item = cb.closest(".simulator-skill-item");
+        if (item) {
+          if (cb.checked) {
+            item.classList.add("checked");
+          } else {
+            item.classList.remove("checked");
+          }
+        }
+
+        const checkedCount = document.querySelectorAll(".simulator-checkbox:checked").length;
+        const totalBoost = Math.min(100 - baseScore, checkedCount * boostPerSkill);
+        const newScore = Math.min(100, Math.round((baseScore + totalBoost) * 10) / 10);
+
+        simVal.textContent = newScore;
+        if (checkedCount > 0) {
+          simBadge.textContent = `+${Math.round(totalBoost * 10) / 10}% boost with ${checkedCount} skill(s)`;
+          simBadge.style.color = "#6ee7b7";
+          simBadge.style.background = "rgba(16, 185, 129, 0.25)";
+        } else {
+          simBadge.textContent = "check skills above to simulate boost";
+          simBadge.style.color = "var(--text-muted)";
+          simBadge.style.background = "rgba(255, 255, 255, 0.05)";
+        }
+      });
+    });
+  }
+});
+</script>
 {% endblock %}
