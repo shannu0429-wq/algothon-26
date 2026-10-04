@@ -81,12 +81,12 @@
                 </div>
                 <div style="margin-top: 0.6rem; display: flex; gap: 0.5rem;">
                   <a href="{{ url_for('resume.view_resume') }}" class="btn btn-xs btn-outline">view full parsed resume</a>
-                  <a href="{{ url_for('resume.upload_resume_view') }}" class="btn btn-xs btn-secondary">update resume</a>
+                  <a href="{{ url_for('resume.upload_page') }}" class="btn btn-xs btn-secondary">update resume</a>
                 </div>
               </div>
             {% else %}
               <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">no resume uploaded yet.</p>
-              <a href="{{ url_for('resume.upload_resume_view') }}" class="btn btn-sm btn-primary" style="margin-top: 0.5rem;">upload your resume</a>
+              <a href="{{ url_for('resume.upload_page') }}" class="btn btn-sm btn-primary" style="margin-top: 0.5rem;">upload your resume</a>
             {% endif %}
           </div>
 

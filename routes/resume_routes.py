@@ -24,6 +24,7 @@ def view_resume():
     return render_template("resume.html", user=user, resume=latest_resume, parsed=parsed)
 
 @resume_bp.route("/resume/upload")
+@resume_bp.route("/upload-resume", endpoint="upload_resume_view")
 @login_required
 def upload_page():
     user_id = session.get("user_id")
