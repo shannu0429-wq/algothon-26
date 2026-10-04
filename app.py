@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, session, jsonify
+from werkzeug.middleware.proxy_fix import ProxyFix
 from config import Config
 from models import db, User, Resume, Job, Match
 from routes import auth_bp, dashboard_bp, resume_bp, job_bp, matching_bp
@@ -7,6 +8,7 @@ from routes import auth_bp, dashboard_bp, resume_bp, job_bp, matching_bp
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     os.makedirs(app.config["RESUME_UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.config["JOB_UPLOAD_FOLDER"], exist_ok=True)
@@ -61,4 +63,4 @@ def create_app(config_class=Config):
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
