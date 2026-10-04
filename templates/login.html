@@ -1,68 +1,46 @@
 {% extends "base.html" %}
 
-{% block title %}login — jobalign ai{% endblock %}
+{% block title %}sign in — jobalign ai{% endblock %}
 
 {% block content %}
 <div class="auth-wrapper">
   <div class="auth-card">
     <div class="auth-header">
-      <h1 class="auth-title">welcome back</h1>
-      <p class="auth-subtitle">sign in to your jobalign ai account to access your matches and resume analyses.</p>
+      <h1 class="auth-title">sign in</h1>
+      <p class="auth-subtitle">enter your candidate account credentials to access your dashboard and matching reports.</p>
     </div>
 
-    <div style="margin-bottom: 1.5rem; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--radius-md); padding: 1rem; text-align: center;">
-      <p style="font-size: 0.85rem; color: #c7d2fe; margin-bottom: 0.75rem;">
-        evaluating or testing the platform? sign in instantly with one click:
-      </p>
-      <a href="{{ url_for('auth.demo_login', next=request.args.get('next')) }}" class="btn btn-sm btn-accent" style="width: 100%;">
-        ⚡ sign in as demo candidate (1-click)
-      </a>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
-      <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
-      <span style="font-size: 0.78rem; color: var(--text-dim);">or sign in with email</span>
-      <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
-    </div>
+    {% if logged_user %}
+      <div style="margin-bottom: 1.5rem; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: var(--radius-md); padding: 0.9rem 1rem;">
+        <div style="font-size: 0.84rem; color: #c7d2fe; margin-bottom: 0.5rem;">
+          you are currently signed in as <strong>{{ logged_user.email }}</strong>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <a href="{{ url_for('dashboard.dashboard_view') }}" class="btn btn-xs btn-primary">go to dashboard</a>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-xs btn-secondary">sign out</a>
+        </div>
+      </div>
+    {% endif %}
 
     <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
       <div class="form-group">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <label for="email" class="form-label">email address</label>
-          <button type="button" id="fill-demo-creds-btn" style="background: none; border: none; color: var(--primary-light); font-size: 0.78rem; cursor: pointer; text-decoration: underline; padding: 0;">fill demo</button>
-        </div>
-        <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" value="{{ email or 'demo@jobalign.ai' }}" required autofocus>
+        <label for="email" class="form-label">email address</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" value="{{ email or '' }}" required autofocus>
       </div>
 
       <div class="form-group">
         <label for="password" class="form-label">password</label>
-        <input type="password" id="password" name="password" class="form-control" placeholder="enter your password" value="password123" required>
+        <input type="password" id="password" name="password" class="form-control" placeholder="enter your password" value="" required>
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">sign in</button>
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">sign in</button>
     </form>
 
-    <div class="auth-footer">
-      <p>don't have an account yet? <a href="{{ url_for('auth.register') }}">create one here</a></p>
+    <div class="auth-footer" style="margin-top: 1.5rem; text-align: center;">
+      <p style="font-size: 0.85rem; color: var(--text-muted);">
+        don't have an account yet? <a href="{{ url_for('auth.register') }}" style="color: var(--primary-light); font-weight: 600;">create an account</a>
+      </p>
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const fillBtn = document.getElementById("fill-demo-creds-btn");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-
-  if (fillBtn && emailInput && passwordInput) {
-    fillBtn.addEventListener("click", () => {
-      emailInput.value = "demo@jobalign.ai";
-      passwordInput.value = "password123";
-      showToast("filled demo credentials.", "info");
-    });
-  }
-});
-</script>
 {% endblock %}
