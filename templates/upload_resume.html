@@ -4,65 +4,9 @@
 
 {% block content %}
 <div class="dashboard-layout">
-  <aside class="dashboard-sidebar">
-    <ul class="sidebar-menu">
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">📊</span>
-          <span>dashboard</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link active">
-          <span class="sidebar-icon">📄</span>
-          <span>my resume</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">⚡</span>
-          <span>job matcher</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">💼</span>
-          <span>job search</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">🕒</span>
-          <span>match history</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">🎯</span>
-          <span>skills</span>
-        </a>
-      </li>
-      <div class="sidebar-divider"></div>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">👤</span>
-          <span>profile</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">⚙️</span>
-          <span>settings</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
-          <span class="sidebar-icon">🚪</span>
-          <span>logout</span>
-        </a>
-      </li>
-    </ul>
-  </aside>
+  {% with active_page='resume' %}
+    {% include "components/sidebar.html" %}
+  {% endwith %}
 
   <main class="dashboard-main">
     <div class="dashboard-header">

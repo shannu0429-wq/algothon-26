@@ -4,8 +4,8 @@
       {{ (session.get('user_name', 'u') or 'u')[:2]|upper }}
     </div>
     <div class="sidebar-user-info">
-      <span class="sidebar-user-name">{{ session.get('user_name', 'candidate') }}</span>
-      <span class="sidebar-user-role">candidate</span>
+      <span class="sidebar-user-name">{{ session.get('user_name', 'guest candidate') }}</span>
+      <span class="sidebar-user-role">{% if session.get('user_id') %}candidate{% else %}guest{% endif %}</span>
     </div>
     <button type="button" class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="toggle sidebar">
       <span class="collapse-icon">&laquo;</span>
@@ -13,61 +13,95 @@
   </div>
 
   <ul class="sidebar-menu">
-    <li class="sidebar-item">
-      <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}">
-        <span class="sidebar-icon">📊</span>
-        <span class="sidebar-text">dashboard</span>
-      </a>
-    </li>
-    <li class="sidebar-item">
-      <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link {% if active_page == 'matcher' %}active{% endif %}">
-        <span class="sidebar-icon">⚡</span>
-        <span class="sidebar-text">job matcher</span>
-      </a>
-    </li>
-    <li class="sidebar-item">
-      <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link {% if active_page == 'jobs' %}active{% endif %}">
-        <span class="sidebar-icon">💼</span>
-        <span class="sidebar-text">job search</span>
-      </a>
-    </li>
-    <li class="sidebar-item">
-      <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link {% if active_page == 'resume' %}active{% endif %}">
-        <span class="sidebar-icon">📄</span>
-        <span class="sidebar-text">my resume</span>
-      </a>
-    </li>
-    <li class="sidebar-item">
-      <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link {% if active_page == 'skills' %}active{% endif %}">
-        <span class="sidebar-icon">🎯</span>
-        <span class="sidebar-text">skills</span>
-      </a>
-    </li>
-    <li class="sidebar-item">
-      <a href="{{ url_for('matching.history_view') }}" class="sidebar-link {% if active_page == 'history' %}active{% endif %}">
-        <span class="sidebar-icon">🕒</span>
-        <span class="sidebar-text">match history</span>
-      </a>
-    </li>
-    <li class="sidebar-item">
-      <a href="{{ url_for('dashboard.how_it_works_view') }}" class="sidebar-link {% if active_page == 'how_it_works' %}active{% endif %}">
-        <span class="sidebar-icon">💡</span>
-        <span class="sidebar-text">how it works</span>
-      </a>
-    </li>
-    <div class="sidebar-divider"></div>
-    <li class="sidebar-item">
-      <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link {% if active_page == 'profile' %}active{% endif %}">
-        <span class="sidebar-icon">👤</span>
-        <span class="sidebar-text">profile</span>
-      </a>
-    </li>
-    <li class="sidebar-item">
-      <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link {% if active_page == 'settings' %}active{% endif %}">
-        <span class="sidebar-icon">⚙️</span>
-        <span class="sidebar-text">settings</span>
-      </a>
-    </li>
+    {% if session.get('user_id') %}
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}">
+          <span class="sidebar-icon">📊</span>
+          <span class="sidebar-text">dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link {% if active_page == 'matcher' %}active{% endif %}">
+          <span class="sidebar-icon">⚡</span>
+          <span class="sidebar-text">job matcher</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link {% if active_page == 'jobs' %}active{% endif %}">
+          <span class="sidebar-icon">💼</span>
+          <span class="sidebar-text">job search</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link {% if active_page == 'resume' %}active{% endif %}">
+          <span class="sidebar-icon">📄</span>
+          <span class="sidebar-text">my resume</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link {% if active_page == 'skills' %}active{% endif %}">
+          <span class="sidebar-icon">🎯</span>
+          <span class="sidebar-text">skills</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link {% if active_page == 'history' %}active{% endif %}">
+          <span class="sidebar-icon">🕒</span>
+          <span class="sidebar-text">match history</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.how_it_works_view') }}" class="sidebar-link {% if active_page == 'how_it_works' %}active{% endif %}">
+          <span class="sidebar-icon">💡</span>
+          <span class="sidebar-text">how it works</span>
+        </a>
+      </li>
+      <div class="sidebar-divider"></div>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link {% if active_page == 'profile' %}active{% endif %}">
+          <span class="sidebar-icon">👤</span>
+          <span class="sidebar-text">profile</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link {% if active_page == 'settings' %}active{% endif %}">
+          <span class="sidebar-icon">⚙️</span>
+          <span class="sidebar-text">settings</span>
+        </a>
+      </li>
+    {% else %}
+      <li class="sidebar-item">
+        <a href="{{ url_for('index') }}" class="sidebar-link {% if active_page == 'home' %}active{% endif %}">
+          <span class="sidebar-icon">🏠</span>
+          <span class="sidebar-text">home</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link {% if active_page == 'jobs' %}active{% endif %}">
+          <span class="sidebar-icon">💼</span>
+          <span class="sidebar-text">job search</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.how_it_works_view') }}" class="sidebar-link {% if active_page == 'how_it_works' %}active{% endif %}">
+          <span class="sidebar-icon">💡</span>
+          <span class="sidebar-text">how it works</span>
+        </a>
+      </li>
+      <div class="sidebar-divider"></div>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.login') }}" class="sidebar-link">
+          <span class="sidebar-icon">🔑</span>
+          <span class="sidebar-text">login</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.register') }}" class="sidebar-link">
+          <span class="sidebar-icon">✨</span>
+          <span class="sidebar-text">create account</span>
+        </a>
+      </li>
+    {% endif %}
   </ul>
 
   <div class="sidebar-footer">
@@ -75,9 +109,11 @@
       <span class="theme-icon">🌙</span>
       <span class="theme-label sidebar-text">dark mode</span>
     </button>
-    <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-logout">
-      <span class="sidebar-icon">🚪</span>
-      <span class="sidebar-text">logout</span>
-    </a>
+    {% if session.get('user_id') %}
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-logout">
+        <span class="sidebar-icon">🚪</span>
+        <span class="sidebar-text">logout</span>
+      </a>
+    {% endif %}
   </div>
 </aside>

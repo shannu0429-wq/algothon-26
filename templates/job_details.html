@@ -3,8 +3,13 @@
 {% block title %}{{ job.title }} at {{ job.company }} — jobalign ai{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 2.5rem; padding-bottom: 3.5rem; max-width: 900px;">
-  <div style="margin-bottom: 1.5rem;">
+<div class="dashboard-layout">
+  {% with active_page='jobs' %}
+    {% include "components/sidebar.html" %}
+  {% endwith %}
+
+  <main class="dashboard-main">
+    <div style="margin-bottom: 1.5rem;">
     <a href="{{ url_for('job.jobs_view') }}" style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
       &larr; back to all jobs
     </a>
@@ -154,6 +159,7 @@
       {% endif %}
     </div>
   </div>
+  </main>
 </div>
 {% endblock %}
 
