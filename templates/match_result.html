@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}your job match — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">📊</span>
+          <span>dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link">
+          <span class="sidebar-icon">📄</span>
+          <span>my resume</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link active">
+          <span class="sidebar-icon">⚡</span>
+          <span>job matcher</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">💼</span>
+          <span>job search</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🕒</span>
+          <span>match history</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🎯</span>
+          <span>skills</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.database_details_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🗄️</span>
+          <span>database</span>
+        </a>
+      </li>
+      <div class="sidebar-divider"></div>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">👤</span>
+          <span>profile</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚙️</span>
+          <span>settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
+          <span class="sidebar-icon">🚪</span>
+          <span>logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 class="dashboard-title">your job match</h1>
+        <p class="dashboard-subtitle">
+          target role: <span style="color: #fff; font-weight: 600;">{{ match.job_title }}</span> &bull; 
+          company: <span style="color: #fff; font-weight: 600;">{{ match.company_name }}</span>
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.6rem;">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="btn btn-secondary">analyze another role</a>
+        <a href="{{ url_for('job.jobs_view') }}" class="btn btn-primary">explore all jobs</a>
+      </div>
+    </div>
+
+    <div class="score-display-card">
+      <div id="score-circle-indicator" class="score-circle" style="--score-pct: {{ match.overall_score }};">
+        <div class="score-inner">
+          <span id="animated-score-number" class="score-number" data-score="{{ match.overall_score }}">0%</span>
+        </div>
+      </div>
+      <h2 class="score-label">{{ category }}</h2>
+      <p class="score-subtext">compatibility score based on resume-job alignment.</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">score breakdown</h3>
+          </div>
+          <div class="breakdown-list">
+            <div class="breakdown-row">
+              <div class="breakdown-meta">
+                <span>skills match (40%)</span>
+                <span>{{ match.skill_score }}%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" data-target-width="{{ match.skill_score }}%" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="breakdown-row">
+              <div class="breakdown-meta">
+                <span>experience match (20%)</span>
+                <span>{{ match.experience_score }}%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" data-target-width="{{ match.experience_score }}%" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="breakdown-row">
+              <div class="breakdown-meta">
+                <span>semantic job fit (20%)</span>
+                <span>{{ match.semantic_score }}%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" data-target-width="{{ match.semantic_score }}%" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="breakdown-row">
+              <div class="breakdown-meta">
+                <span>education match (10%)</span>
+                <span>{{ match.education_score }}%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" data-target-width="{{ match.education_score }}%" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="breakdown-row">
+              <div class="breakdown-meta">
+                <span>project relevance (10%)</span>
+                <span>{{ match.project_score }}%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" data-target-width="{{ match.project_score }}%" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">skills you match</h3>
+          </div>
+          {% if match.matched_skills %}
+            <div class="skills-badge-wrap">
+              {% for s in match.matched_skills %}
+                <span class="skill-tag matched">✓ {{ s }}</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--text-dim); font-size: 0.9rem;">no direct overlapping technical skills detected.</p>
+          {% endif %}
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">skills not detected</h3>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.85rem;">
+            the following requirements were not detected in your resume:
+          </p>
+          {% if match.missing_skills %}
+            <div class="skills-badge-wrap">
+              {% for s in match.missing_skills %}
+                <span class="skill-tag missing">○ {{ s }}</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: #6ee7b7; font-size: 0.9rem;">excellent! all core skills requested by the job were detected in your resume.</p>
+          {% endif %}
+        </div>
+
+        {% if match.partial_skills %}
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">partial matches</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+              {% for p in match.partial_skills %}
+                <div class="partial-match-card">
+                  <span>{{ p.explanation }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">why this match?</h3>
+          </div>
+          
+          {% if match.explanation.technical_alignment %}
+            <div class="explanation-card">
+              <h4 class="explanation-title">strong technical alignment</h4>
+              <p class="explanation-text">{{ match.explanation.technical_alignment }}</p>
+            </div>
+          {% endif %}
+
+          {% if match.explanation.project_experience %}
+            <div class="explanation-card">
+              <h4 class="explanation-title">relevant project experience</h4>
+              <p class="explanation-text">{{ match.explanation.project_experience }}</p>
+            </div>
+          {% endif %}
+
+          {% if match.explanation.experience_fit %}
+            <div class="explanation-card">
+              <h4 class="explanation-title">experience & seniority fit</h4>
+              <p class="explanation-text">{{ match.explanation.experience_fit }}</p>
+            </div>
+          {% endif %}
+
+          {% if match.explanation.skill_gap %}
+            <div class="explanation-card">
+              <h4 class="explanation-title">skill gap</h4>
+              <p class="explanation-text">{{ match.explanation.skill_gap }}</p>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">how to improve your match</h3>
+          </div>
+          {% if match.recommendations %}
+            <div>
+              {% for rec in match.recommendations %}
+                <div class="recommendation-item">
+                  <span class="rec-bullet">✦</span>
+                  <span>{{ rec }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--text-dim); font-size: 0.9rem;">your resume already demonstrates solid alignment with this job requirement.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/matcher.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

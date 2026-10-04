@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}register — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1 class="auth-title">create your account</h1>
+      <p class="auth-subtitle">join jobalign ai to unlock deep resume parsing and intelligent job matching.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.register') }}">
+      <div class="form-group">
+        <label for="name" class="form-label">full name</label>
+        <input type="text" id="name" name="name" class="form-control" placeholder="jane doe" value="{{ name or '' }}" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label">email address</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" value="{{ email or '' }}" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="at least 6 characters" required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password" class="form-label">confirm password</label>
+        <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="re-enter password" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">create account</button>
+    </form>
+
+    <div class="auth-footer">
+      <p>already have an account? <a href="{{ url_for('auth.login') }}">sign in here</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

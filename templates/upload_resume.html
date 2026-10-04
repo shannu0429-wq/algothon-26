@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}upload resume — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">📊</span>
+          <span>dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link active">
+          <span class="sidebar-icon">📄</span>
+          <span>my resume</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚡</span>
+          <span>job matcher</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">💼</span>
+          <span>job search</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🕒</span>
+          <span>match history</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🎯</span>
+          <span>skills</span>
+        </a>
+      </li>
+      <div class="sidebar-divider"></div>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">👤</span>
+          <span>profile</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚙️</span>
+          <span>settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
+          <span class="sidebar-icon">🚪</span>
+          <span>logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">upload resume</h1>
+      <p class="dashboard-subtitle">upload your resume in pdf, docx, txt, png, jpg, or jpeg format for automated parsing.</p>
+    </div>
+
+    <div style="max-width: 720px; margin: 0 auto;">
+      <form id="resume-upload-form" class="panel">
+        <div id="resume-dropzone" class="dropzone-container">
+          <div class="dropzone-icon">📁</div>
+          <h2 class="dropzone-title">drag and drop your resume here</h2>
+          <p class="dropzone-desc">or click anywhere in this box to browse local files on your device</p>
+          <span class="btn btn-sm btn-secondary">browse files</span>
+          <input type="file" id="resume-file-input" name="resume_file" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" style="display: none;">
+        </div>
+
+        <div id="file-info-box" style="display: none; margin-top: 1.5rem; background: rgba(10, 15, 29, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-weight: 600; color: #fff;" id="file-name-display">resume.pdf</span>
+            <span class="badge badge-primary" id="file-type-display">pdf</span>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            <span>file size: </span>
+            <span id="file-size-display">0 kb</span>
+          </div>
+        </div>
+
+        <div id="processing-stages-box" class="processing-stages" style="display: none;">
+          <div id="stage-uploading" class="stage-item">
+            <span class="stage-icon">○</span>
+            <span>uploading...</span>
+          </div>
+          <div id="stage-extracting" class="stage-item">
+            <span class="stage-icon">○</span>
+            <span>extracting text...</span>
+          </div>
+          <div id="stage-detecting" class="stage-item">
+            <span class="stage-icon">○</span>
+            <span>detecting sections...</span>
+          </div>
+          <div id="stage-skills" class="stage-item">
+            <span class="stage-icon">○</span>
+            <span>identifying skills...</span>
+          </div>
+          <div id="stage-experience" class="stage-item">
+            <span class="stage-icon">○</span>
+            <span>understanding experience...</span>
+          </div>
+          <div id="stage-profile" class="stage-item">
+            <span class="stage-icon">○</span>
+            <span>building your candidate profile...</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <a href="{{ url_for('resume.view_resume') }}" class="btn btn-secondary">cancel</a>
+          <button type="submit" id="resume-submit-btn" class="btn btn-primary" disabled>analyze resume</button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

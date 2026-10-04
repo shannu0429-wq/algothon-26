@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}job search — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 3.5rem;">
+  <div style="margin-bottom: 1.5rem;">
+    <h1 class="dashboard-title">job search & ai matching</h1>
+    <p class="dashboard-subtitle">
+      {% if has_resume %}
+        opportunities ranked dynamically by your verified skills and resume profile.
+      {% else %}
+        explore tech opportunities. upload your resume to see personalized compatibility scores.
+      {% endif %}
+    </p>
+  </div>
+
+  {% if has_resume %}
+    <div class="candidate-bar">
+      <div class="candidate-bar-info">
+        <span style="font-size: 1.25rem;">⚡</span>
+        <div>
+          <div style="font-weight: 600; color: #fff; font-size: 0.9rem;">
+            ranked for: {{ user.name if user else 'candidate' }} &bull; {{ resume.filename }}
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-dim);">
+            showing {{ total_jobs_found }} jobs &bull; average compatibility: <span style="color: var(--primary-light); font-weight: 600;">{{ avg_score }}%</span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="btn btn-sm btn-primary">open job matcher</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="panel" style="margin-bottom: 1.75rem;">
+    <form id="jobs-filter-form" method="GET" action="{{ url_for('job.jobs_view') }}">
+      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="search-keyword">search by title, company, or skill</label>
+          <div style="position: relative;">
+            <input type="text" id="search-keyword" name="q" class="form-control" placeholder="e.g. python, backend, machine learning, apex" value="{{ selected_q }}" style="padding-right: 2.2rem;">
+            {% if selected_q %}
+              <button type="button" id="clear-search-btn" style="position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 1rem;">✕</button>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="filter-location">location</label>
+          <select id="filter-location" name="location" class="form-control auto-submit-filter">
+            <option value="all">all locations</option>
+            {% for loc in locations %}
+              <option value="{{ loc }}" {% if selected_location == loc %}selected{% endif %}>{{ loc }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="filter-type">job type</label>
+          <select id="filter-type" name="type" class="form-control auto-submit-filter">
+            <option value="all">all types</option>
+            {% for jt in job_types %}
+              <option value="{{ jt }}" {% if selected_type == jt %}selected{% endif %}>{{ jt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <div class="quick-skills-bar">
+          <span style="font-size: 0.8rem; color: var(--text-dim); margin-right: 0.3rem;">popular skills:</span>
+          <button type="button" class="quick-skill-chip {% if not selected_q %}active{% endif %}" data-skill="">all</button>
+          {% for sk in top_filter_skills %}
+            <button type="button" class="quick-skill-chip {% if selected_q == sk %}active{% endif %}" data-skill="{{ sk }}">{{ sk }}</button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color);">
+        <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label for="filter-sort" class="form-label" style="margin-bottom: 0;">sort by:</label>
+            <select id="filter-sort" name="sort" class="form-control auto-submit-filter" style="width: auto; padding: 0.4rem 0.8rem;">
+              <option value="best_match" {% if selected_sort == 'best_match' %}selected{% endif %}>best match</option>
+              <option value="highest_score" {% if selected_sort == 'highest_score' %}selected{% endif %}>highest score</option>
+              <option value="recently_added" {% if selected_sort == 'recently_added' %}selected{% endif %}>recently added</option>
+            </select>
+          </div>
+
+          {% if has_resume %}
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <label for="min-score-slider" class="form-label" style="margin-bottom: 0;">min score:</label>
+              <input type="range" id="min-score-slider" name="min_score" min="0" max="90" step="5" value="{{ selected_min_score }}" style="vertical-align: middle;">
+              <span id="min-score-val" style="font-size: 0.88rem; font-weight: 600; color: var(--primary-light);">{{ selected_min_score }}%</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+          <a href="{{ url_for('job.jobs_view') }}" class="btn btn-sm btn-secondary">reset filters</a>
+          <button type="submit" class="btn btn-sm btn-primary">apply filters</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 1.1rem;">
+    {% if jobs %}
+      {% for job in jobs %}
+        <div class="job-card">
+          <div class="job-header">
+            <div>
+              <h2 class="job-title">
+                <a href="{{ url_for('job.job_details_view', job_id=job.id) }}">{{ job.title }}</a>
+              </h2>
+              <p class="job-company">{{ job.company }} &bull; {{ job.location }}</p>
+            </div>
+            <div>
+              {% if job.match_score is defined %}
+                {% if job.match_score >= 70 %}
+                  <span class="badge badge-success job-match-badge">{{ job.match_score|round(1) }}% match &bull; strong fit</span>
+                {% elif job.match_score >= 50 %}
+                  <span class="badge badge-primary job-match-badge" style="background: rgba(99, 102, 241, 0.18); border: 1px solid rgba(99, 102, 241, 0.35); color: #c7d2fe;">{{ job.match_score|round(1) }}% match &bull; good fit</span>
+                {% else %}
+                  <span class="badge badge-warning job-match-badge">{{ job.match_score|round(1) }}% match &bull; partial fit</span>
+                {% endif %}
+              {% else %}
+                <span class="badge badge-secondary">upload resume to match</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.85rem;">
+            {{ job.description[:175] }}...
+          </p>
+
+          <div class="job-meta-row">
+            <span class="meta-pill">📅 {{ job.experience_required }}</span>
+            <span class="meta-pill">🎓 {{ job.education_required }}</span>
+            <span class="meta-pill">💼 {{ job.job_type }}</span>
+          </div>
+
+          {% if has_resume and job.matched_skills is defined %}
+            <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-sm); padding: 0.65rem 0.85rem; margin-bottom: 0.85rem;">
+              {% if job.matched_skills %}
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.4rem;">
+                  <span style="font-size: 0.78rem; font-weight: 600; color: #6ee7b7; margin-right: 0.2rem;">matched skills ({{ job.matched_skills|length }}):</span>
+                  {% for sk in job.matched_skills[:6] %}
+                    <span class="skill-tag matched" style="font-size: 0.75rem; padding: 0.15rem 0.5rem;">✓ {{ sk }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              {% if job.missing_skills %}
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem;">
+                  <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-dim); margin-right: 0.2rem;">missing skills ({{ job.missing_skills|length }}):</span>
+                  {% for sk in job.missing_skills[:5] %}
+                    <span class="skill-tag missing" style="font-size: 0.75rem; padding: 0.15rem 0.5rem;">○ {{ sk }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% else %}
+            <div style="margin-bottom: 0.85rem;">
+              <div class="skills-badge-wrap">
+                {% for sk in job.required_skills[:6] %}
+                  <span class="skill-tag" style="font-size: 0.76rem;">✦ {{ sk }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+            <a href="{{ url_for('job.job_details_view', job_id=job.id) }}" class="btn btn-sm btn-secondary">
+              view details & breakdown
+            </a>
+            <div style="display: flex; gap: 0.5rem;">
+              {% if has_resume %}
+                <button class="btn btn-sm btn-primary trigger-job-match-btn" data-job-id="{{ job.id }}">
+                  run deep match analysis
+                </button>
+              {% else %}
+                <a href="{{ url_for('resume.upload_page') }}" class="btn btn-sm btn-outline">
+                  upload resume to see score
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="panel" style="text-align: center; padding: 3rem 1.5rem;">
+        <h3 class="panel-title" style="margin-bottom: 0.5rem;">no matching jobs found</h3>
+        <p class="card-desc" style="margin-bottom: 1.5rem;">try adjusting your search keywords, location filters, or minimum match score.</p>
+        <a href="{{ url_for('job.jobs_view') }}" class="btn btn-secondary">clear all filters</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+{% endblock %}

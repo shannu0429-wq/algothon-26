@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}match history — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">📊</span>
+          <span>dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link">
+          <span class="sidebar-icon">📄</span>
+          <span>my resume</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚡</span>
+          <span>job matcher</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">💼</span>
+          <span>job search</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link active">
+          <span class="sidebar-icon">🕒</span>
+          <span>match history</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🎯</span>
+          <span>skills</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.database_details_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🗄️</span>
+          <span>database</span>
+        </a>
+      </li>
+      <div class="sidebar-divider"></div>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">👤</span>
+          <span>profile</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚙️</span>
+          <span>settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
+          <span class="sidebar-icon">🚪</span>
+          <span>logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 class="dashboard-title">match history</h1>
+        <p class="dashboard-subtitle">review past compatibility evaluations and reopen detailed reports.</p>
+      </div>
+      <a href="{{ url_for('matching.job_matcher_view') }}" class="btn btn-primary">new match</a>
+    </div>
+
+    <div class="panel">
+      {% if matches %}
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.82rem;">
+                <th style="padding: 0.75rem 1rem;">job title</th>
+                <th style="padding: 0.75rem 1rem;">company</th>
+                <th style="padding: 0.75rem 1rem;">compatibility score</th>
+                <th style="padding: 0.75rem 1rem;">date analyzed</th>
+                <th style="padding: 0.75rem 1rem; text-align: right;">action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in matches %}
+                <tr style="border-bottom: 1px solid var(--border-color); transition: var(--transition);">
+                  <td style="padding: 1rem; font-weight: 600; color: #fff;">
+                    {{ m.job_title }}
+                  </td>
+                  <td style="padding: 1rem; color: var(--text-muted);">
+                    {{ m.company_name }}
+                  </td>
+                  <td style="padding: 1rem;">
+                    <span class="badge badge-success" style="font-size: 0.88rem; font-weight: 700;">
+                      {{ m.overall_score }}%
+                    </span>
+                  </td>
+                  <td style="padding: 1rem; color: var(--text-dim); font-size: 0.85rem;">
+                    {{ m.created_at[:10] if m.created_at else '' }}
+                  </td>
+                  <td style="padding: 1rem; text-align: right;">
+                    <a href="{{ url_for('matching.match_result_view', match_id=m.id) }}" class="btn btn-sm btn-secondary">view result</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div style="text-align: center; padding: 2.5rem 1rem;">
+          <h3 class="panel-title" style="margin-bottom: 0.4rem;">no match history recorded</h3>
+          <p class="card-desc" style="margin-bottom: 1.5rem;">analyze your resume against any job description to record your first match.</p>
+          <a href="{{ url_for('matching.job_matcher_view') }}" class="btn btn-primary">open job matcher</a>
+        </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}

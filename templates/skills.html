@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}skills — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">📊</span>
+          <span>dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link">
+          <span class="sidebar-icon">📄</span>
+          <span>my resume</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚡</span>
+          <span>job matcher</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">💼</span>
+          <span>job search</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🕒</span>
+          <span>match history</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link active">
+          <span class="sidebar-icon">🎯</span>
+          <span>skills</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.database_details_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🗄️</span>
+          <span>database</span>
+        </a>
+      </li>
+      <div class="sidebar-divider"></div>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">👤</span>
+          <span>profile</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚙️</span>
+          <span>settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
+          <span class="sidebar-icon">🚪</span>
+          <span>logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">my skills & market recommendations</h1>
+      <p class="dashboard-subtitle">skills extracted from your resume alongside high-demand market recommendations.</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">my skills</h2>
+            <span class="badge badge-primary">{{ user_skills|length }} detected</span>
+          </div>
+
+          {% if categorized_skills %}
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+              {% for cat, skills in categorized_skills.items() %}
+                <div>
+                  <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--primary-light); margin-bottom: 0.5rem;">
+                    {{ cat }}
+                  </h3>
+                  <div class="skills-badge-wrap">
+                    {% for s in skills %}
+                      <span class="skill-tag matched">✓ {{ s }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div style="text-align: center; padding: 2rem 1rem;">
+              <p style="color: var(--text-muted); margin-bottom: 1rem;">no resume skills available to display.</p>
+              <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">upload resume</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">recommended skills</h2>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+            high-frequency requirements detected across active jobs that are currently not detected in your resume:
+          </p>
+
+          {% if recommended_skills %}
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              {% for rec in recommended_skills %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: rgba(10, 15, 29, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                  <div>
+                    <h3 style="font-size: 0.92rem; font-weight: 600; color: #fff;">{{ rec.name }}</h3>
+                    <span style="font-size: 0.78rem; color: var(--text-dim);">category: {{ rec.category }}</span>
+                  </div>
+                  <span class="badge badge-warning">{{ rec.demand_frequency }} active jobs</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--text-dim); font-size: 0.9rem;">no additional skill recommendations at this time.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

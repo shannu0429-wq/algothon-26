@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} at {{ job.company }} — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 3.5rem; max-width: 900px;">
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('job.jobs_view') }}" style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+      &larr; back to all jobs
+    </a>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 class="dashboard-title">{{ job.title }}</h1>
+        <p class="dashboard-subtitle">{{ job.company }} &bull; {{ job.location }}</p>
+      </div>
+      <div>
+        {% if has_resume %}
+          <button class="btn btn-primary trigger-job-match-btn" data-job-id="{{ job.id }}">
+            match my resume with this job
+          </button>
+        {% else %}
+          <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">
+            upload resume to match
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if has_resume and match_info %}
+    <div class="panel" style="background: rgba(15, 23, 42, 0.7); border-color: rgba(99, 102, 241, 0.3); margin-bottom: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--primary-light); text-transform: lowercase; margin-bottom: 0.2rem;">
+            ai candidate compatibility
+          </div>
+          <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff;">
+            {{ match_info.overall_score }}% — {{ match_info.category }}
+          </h2>
+        </div>
+        <button class="btn btn-sm btn-primary trigger-job-match-btn" data-job-id="{{ job.id }}">
+          view full match report & recommendations
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+            <span>skills match</span>
+            <span style="color: #fff; font-weight: 600;">{{ match_info.breakdown.skill_score }}%</span>
+          </div>
+          <div class="progress-bar-bg" style="height: 6px;">
+            <div class="progress-bar-fill" style="width: {{ match_info.breakdown.skill_score }}%;"></div>
+          </div>
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+            <span>experience fit</span>
+            <span style="color: #fff; font-weight: 600;">{{ match_info.breakdown.experience_score }}%</span>
+          </div>
+          <div class="progress-bar-bg" style="height: 6px;">
+            <div class="progress-bar-fill" style="width: {{ match_info.breakdown.experience_score }}%;"></div>
+          </div>
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+            <span>semantic fit</span>
+            <span style="color: #fff; font-weight: 600;">{{ match_info.breakdown.semantic_score }}%</span>
+          </div>
+          <div class="progress-bar-bg" style="height: 6px;">
+            <div class="progress-bar-fill" style="width: {{ match_info.breakdown.semantic_score }}%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 600; color: #6ee7b7; margin-bottom: 0.4rem;">
+            matched skills ({{ match_info.matched_skills|length }})
+          </div>
+          <div class="skills-badge-wrap">
+            {% for s in match_info.matched_skills %}
+              <span class="skill-tag matched" style="font-size: 0.76rem;">✓ {{ s }}</span>
+            {% else %}
+              <span style="font-size: 0.82rem; color: var(--text-dim);">no direct overlapping skills</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-dim); margin-bottom: 0.4rem;">
+            missing skills ({{ match_info.missing_skills|length }})
+          </div>
+          <div class="skills-badge-wrap">
+            {% for s in match_info.missing_skills %}
+              <span class="skill-tag missing" style="font-size: 0.76rem;">○ {{ s }}</span>
+            {% else %}
+              <span style="font-size: 0.82rem; color: #6ee7b7;">all core skills matched!</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="panel">
+    <div class="job-meta-row" style="font-size: 0.9rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+      <span class="meta-pill">📅 experience: {{ job.experience_required }}</span>
+      <span class="meta-pill">🎓 education: {{ job.education_required }}</span>
+      <span class="meta-pill">💼 job type: {{ job.job_type }}</span>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+      <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem;">role overview & description</h3>
+      <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.7; white-space: pre-line;">{{ job.description }}</p>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+      <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem;">must-have required skills</h3>
+      <div class="skills-badge-wrap">
+        {% for sk in job.get_required_skills() %}
+          <span class="skill-tag" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #c7d2fe;">
+            ✦ {{ sk }}
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if job.get_preferred_skills() %}
+      <div style="margin-bottom: 2rem;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem;">nice-to-have preferred skills</h3>
+        <div class="skills-badge-wrap">
+          {% for sk in job.get_preferred_skills() %}
+            <span class="skill-tag">○ {{ sk }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <a href="{{ url_for('matching.job_matcher_view', job_id=job.id) }}" class="btn btn-secondary">
+        customize in job matcher
+      </a>
+      {% if has_resume %}
+        <button class="btn btn-primary trigger-job-match-btn" data-job-id="{{ job.id }}">
+          run deep match analysis
+        </button>
+      {% else %}
+        <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">
+          upload resume to match
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+{% endblock %}

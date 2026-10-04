@@ -1,0 +1,132 @@
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.4rem;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-sidebar {
+    width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-navbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .nav-links {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+    display: none;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+
+  .hero-heading {
+    font-size: 2.25rem;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+  }
+
+  .flow-diagram {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .flow-arrow {
+    transform: rotate(90deg);
+  }
+
+  @keyframes pulseArrow {
+    0%, 100% { opacity: 0.4; transform: rotate(90deg) translateX(0); }
+    50% { opacity: 1; transform: rotate(90deg) translateX(3px); }
+  }
+
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .dashboard-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+  }
+
+  .sidebar-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .sidebar-link {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  .dashboard-main {
+    padding: 1.25rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .job-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .score-circle {
+    width: 130px;
+    height: 130px;
+  }
+
+  .score-number {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+  }
+
+  .auth-card {
+    padding: 1.5rem;
+  }
+}

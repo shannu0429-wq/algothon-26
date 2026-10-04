@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}profile — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">📊</span>
+          <span>dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link">
+          <span class="sidebar-icon">📄</span>
+          <span>my resume</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚡</span>
+          <span>job matcher</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">💼</span>
+          <span>job search</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🕒</span>
+          <span>match history</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🎯</span>
+          <span>skills</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.database_details_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🗄️</span>
+          <span>database</span>
+        </a>
+      </li>
+      <div class="sidebar-divider"></div>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link active">
+          <span class="sidebar-icon">👤</span>
+          <span>profile</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚙️</span>
+          <span>settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
+          <span class="sidebar-icon">🚪</span>
+          <span>logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">user profile</h1>
+      <p class="dashboard-subtitle">manage your contact details, professional portfolio, and career interests.</p>
+    </div>
+
+    <div style="max-width: 680px;">
+      <div class="panel">
+        <form id="profile-edit-form" method="POST" action="{{ url_for('dashboard.profile_view') }}">
+          <div class="form-group">
+            <label class="form-label" for="profile-name">full name</label>
+            <input type="text" id="profile-name" name="name" class="form-control" value="{{ user.name }}" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profile-email">email address</label>
+            <input type="email" id="profile-email" name="email" class="form-control" value="{{ user.email }}" readonly style="opacity: 0.7; cursor: not-allowed;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profile-location">location</label>
+            <input type="text" id="profile-location" name="location" class="form-control" placeholder="e.g. san francisco, ca" value="{{ user.location or '' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profile-linkedin">linkedin url</label>
+            <input type="url" id="profile-linkedin" name="linkedin" class="form-control" placeholder="https://linkedin.com/in/username" value="{{ user.linkedin or '' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profile-github">github url</label>
+            <input type="url" id="profile-github" name="github" class="form-control" placeholder="https://github.com/username" value="{{ user.github or '' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profile-portfolio">portfolio website</label>
+            <input type="url" id="profile-portfolio" name="portfolio" class="form-control" placeholder="https://yourportfolio.dev" value="{{ user.portfolio or '' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profile-career-interests">career interests</label>
+            <textarea id="profile-career-interests" name="career_interests" class="form-control" rows="3" placeholder="e.g. backend engineering, distributed systems, machine learning pipelines">{{ user.career_interests or '' }}</textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary">save profile</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

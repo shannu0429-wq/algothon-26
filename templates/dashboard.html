@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block title %}dashboard — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link active">
+          <span class="sidebar-icon">📊</span>
+          <span>dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link">
+          <span class="sidebar-icon">📄</span>
+          <span>my resume</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚡</span>
+          <span>job matcher</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">💼</span>
+          <span>job search</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🕒</span>
+          <span>match history</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🎯</span>
+          <span>skills</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.database_details_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🗄️</span>
+          <span>database</span>
+        </a>
+      </li>
+      <div class="sidebar-divider"></div>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">👤</span>
+          <span>profile</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚙️</span>
+          <span>settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
+          <span class="sidebar-icon">🚪</span>
+          <span>logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">welcome back, {{ user.name }}</h1>
+      <p class="dashboard-subtitle">here is your current resume analysis and career match status.</p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon-box">📄</div>
+        <div>
+          <div class="metric-label">resume status</div>
+          <div class="metric-value">
+            {% if resume_analyzed %}
+              <span class="badge badge-success">analyzed</span>
+            {% else %}
+              <span class="badge badge-warning">pending</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box">⚡</div>
+        <div>
+          <div class="metric-label">jobs matched</div>
+          <div class="metric-value">{{ jobs_matched_count }}</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box">🏆</div>
+        <div>
+          <div class="metric-label">best match</div>
+          <div class="metric-value">{{ best_match_score }}%</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box">🎯</div>
+        <div>
+          <div class="metric-label">skills detected</div>
+          <div class="metric-value">{{ skills_detected_count }}</div>
+        </div>
+      </div>
+    </div>
+
+    {% if not resume_analyzed %}
+      <div class="panel" style="text-align: center; padding: 2.5rem 1.5rem;">
+        <h3 class="panel-title" style="margin-bottom: 0.5rem;">no resume uploaded yet</h3>
+        <p class="card-desc" style="max-width: 500px; margin: 0 auto 1.5rem;">
+          upload your resume to unlock real-time ai matching, skill extraction, and personalized career gap recommendations.
+        </p>
+        <div style="display: flex; gap: 0.8rem; justify-content: center;">
+          <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">upload resume</a>
+          <button id="dashboard-demo-btn" class="btn btn-accent">try demo</button>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="dashboard-grid">
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">your career match overview</h2>
+            <a href="{{ url_for('matching.job_matcher_view') }}" class="btn btn-sm btn-outline">new match analysis</a>
+          </div>
+
+          {% if latest_match %}
+            <div style="background: rgba(10, 15, 29, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                <div>
+                  <span class="badge badge-primary" style="margin-bottom: 0.35rem;">latest match</span>
+                  <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff;">{{ latest_match.job_title }}</h3>
+                  <p style="font-size: 0.9rem; color: var(--text-muted);">{{ latest_match.company_name }}</p>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-size: 1.75rem; font-weight: 800; color: #a5b4fc;">{{ latest_match.overall_score|round(1) }}%</span>
+                  <div>
+                    <span class="badge badge-success">analyzed match</span>
+                  </div>
+                </div>
+              </div>
+              <a href="{{ url_for('matching.match_result_view', match_id=latest_match.id) }}" class="btn btn-sm btn-secondary">view complete report</a>
+            </div>
+          {% endif %}
+
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 0.85rem;">best matching jobs</h3>
+            {% if top_jobs %}
+              {% for job in top_jobs %}
+                <div class="job-card" style="padding: 1rem; margin-bottom: 0.75rem;">
+                  <div class="job-header">
+                    <div>
+                      <h4 class="job-title" style="font-size: 1.05rem;">
+                        <a href="{{ url_for('job.job_details_view', job_id=job.id) }}">{{ job.title }}</a>
+                      </h4>
+                      <p class="job-company">{{ job.company }} &bull; {{ job.location }}</p>
+                    </div>
+                    <div>
+                      <span class="badge badge-success" style="font-size: 0.9rem; font-weight: 700;">{{ job.match_score|round(1) }}%</span>
+                    </div>
+                  </div>
+                  <div class="job-meta-row" style="margin: 0.4rem 0 0.6rem;">
+                    <span class="meta-pill">📅 {{ job.experience_required }}</span>
+                    <span class="meta-pill">💼 {{ job.job_type }}</span>
+                  </div>
+                  <div class="skills-badge-wrap">
+                    {% for sk in job.required_skills[:5] %}
+                      <span class="skill-tag {% if sk in detected_skills %}matched{% endif %}">{{ sk }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p style="color: var(--text-dim); font-size: 0.9rem;">upload a resume to view top matching jobs dynamically ranked by your skills.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">strongest skills</h3>
+            <a href="{{ url_for('dashboard.skills_view') }}" class="btn btn-sm btn-secondary">all skills</a>
+          </div>
+          {% if detected_skills %}
+            <div class="skills-badge-wrap">
+              {% for sk in detected_skills %}
+                <span class="skill-tag matched">✓ {{ sk }}</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--text-dim); font-size: 0.88rem;">no skills detected yet. upload your resume to extract your technical skillset.</p>
+          {% endif %}
+        </div>
+
+        {% if missing_skills %}
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">skills not detected</h3>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              skills requested in recent jobs but not detected in your resume:
+            </p>
+            <div class="skills-badge-wrap">
+              {% for sk in missing_skills %}
+                <span class="skill-tag missing">○ {{ sk }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if recommendations %}
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">recommendations</h3>
+            </div>
+            <div>
+              {% for rec in recommendations %}
+                <div class="recommendation-item">
+                  <span class="rec-bullet">✦</span>
+                  <span>{{ rec }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">recent activity</h3>
+            <a href="{{ url_for('matching.history_view') }}" class="btn btn-sm btn-secondary">history</a>
+          </div>
+          {% if recent_matches %}
+            <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+              {% for m in recent_matches %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.88rem;">
+                  <div>
+                    <a href="{{ url_for('matching.match_result_view', match_id=m.id) }}" style="font-weight: 600; color: #fff;">{{ m.job_title }}</a>
+                    <p style="color: var(--text-dim); font-size: 0.78rem;">{{ m.company_name }}</p>
+                  </div>
+                  <span class="badge badge-primary">{{ m.overall_score|round(1) }}%</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--text-dim); font-size: 0.88rem;">no recent match activity recorded yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const demoBtn = document.getElementById("dashboard-demo-btn");
+  if (demoBtn) {
+    demoBtn.addEventListener("click", async () => {
+      setButtonLoading(demoBtn, true, "running demo analysis...");
+      try {
+        const res = await fetch("/api/demo-match", { method: "POST" });
+        const d = await res.json();
+        if (res.ok && d.success) {
+          showToast("demo analysis completed successfully.", "success");
+          setTimeout(() => { window.location.href = d.redirect_url; }, 400);
+        } else {
+          setButtonLoading(demoBtn, false);
+          showToast(d.error || "demo analysis failed.", "error");
+        }
+      } catch (e) {
+        setButtonLoading(demoBtn, false);
+        showToast("network error during demo.", "error");
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}jobalign ai — find jobs that actually fit you.{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-tagline">
+      <span>✦</span>
+      <span>ai-powered resume & job matching</span>
+    </div>
+    
+    <h1 class="hero-heading">
+      find jobs that <span>actually fit you.</span>
+    </h1>
+    
+    <p class="hero-desc">
+      jobalign ai analyzes your resume, understands your skills, and intelligently matches you with opportunities that align with your experience and career goals.
+    </p>
+    
+    <div class="hero-buttons">
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('resume.upload_page') }}" class="btn btn-lg btn-primary">analyze my resume</a>
+        <a href="{{ url_for('job.jobs_view') }}" class="btn btn-lg btn-secondary">explore jobs</a>
+      {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-lg btn-primary">analyze my resume</a>
+        <a href="{{ url_for('job.jobs_view') }}" class="btn btn-lg btn-secondary">explore jobs</a>
+        <button id="home-demo-trigger-btn" class="btn btn-lg btn-accent">try demo</button>
+      {% endif %}
+    </div>
+
+    <div class="flow-diagram-container">
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-icon-circle">📄</div>
+          <span class="flow-label">resume</span>
+        </div>
+        <div class="flow-arrow">➔</div>
+        <div class="flow-step">
+          <div class="flow-icon-circle">🧠</div>
+          <span class="flow-label">ai understanding</span>
+        </div>
+        <div class="flow-arrow">➔</div>
+        <div class="flow-step">
+          <div class="flow-icon-circle">⚡</div>
+          <span class="flow-label">skill matching</span>
+        </div>
+        <div class="flow-arrow">➔</div>
+        <div class="flow-step">
+          <div class="flow-icon-circle">🎯</div>
+          <span class="flow-label">compatibility score</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how-it-works" class="section-block">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">how it works</h2>
+      <p class="section-subtitle">a transparent, multi-signal ai pipeline engineered to evaluate genuine job fit rather than simple keyword overlap.</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="card">
+        <div class="card-icon">1</div>
+        <h3 class="card-title">upload any resume</h3>
+        <p class="card-desc">upload pdf, docx, txt, or image resumes. our document parser and ocr engine effortlessly handle multi-column layouts, tables, and unusual formatting.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">2</div>
+        <h3 class="card-title">deep semantic extraction</h3>
+        <p class="card-desc">our nlp engine extracts skills, projects, education, and career experience while normalizing technical abbreviations and equivalencies.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">3</div>
+        <h3 class="card-title">multi-signal matching</h3>
+        <p class="card-desc">we calculate an ai compatibility score combining skills match, experience match, semantic job fit, education match, and project relevance.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">4</div>
+        <h3 class="card-title">clear explainability</h3>
+        <p class="card-desc">see matched skills, skills not detected in your resume, partial matches with reasoning, and actionable steps to improve alignment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="section-block" style="background: rgba(17, 24, 39, 0.4);">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">intelligent features</h2>
+      <p class="section-subtitle">everything you need to understand where you stand and find your ideal role.</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <h3 class="card-title">messy resume robustness</h3>
+        <p class="card-desc">handles inconsistent headings, scanned documents, variations like js to javascript, ml to machine learning, and messy whitespace.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3 class="card-title">ai compatibility scoring</h3>
+        <p class="card-desc">dynamic scoring breakdown weighted across skills (40%), experience (20%), semantic fit (20%), education (10%), and projects (10%).</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">⚖️</div>
+        <h3 class="card-title">partial match intelligence</h3>
+        <p class="card-desc">recognizes related experience such as cloud deployment when aws is requested, explaining the exact nuance without guessing.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🚀</div>
+        <h3 class="card-title">dynamic job ranking</h3>
+        <p class="card-desc">browse job listings ranked by actual compatibility with your verified skills and professional background.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="section-block">
+  <div class="container">
+    <div class="card" style="text-align: center; max-width: 800px; margin: 0 auto; padding: 3rem 2rem;">
+      <h2 class="section-title" style="margin-bottom: 1rem;">match your skills. find your future.</h2>
+      <p class="card-desc" style="font-size: 1.05rem; margin-bottom: 2rem;">
+        jobalign ai is designed to eliminate guesswork from technical hiring. our objective is to empower developers and hiring teams with explainable, data-backed candidate matching that respects context, handles real-world resumes, and delivers actionable insights.
+      </p>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-lg btn-primary">get started with jobalign ai</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const homeDemoBtn = document.getElementById("home-demo-trigger-btn");
+  if (homeDemoBtn) {
+    homeDemoBtn.addEventListener("click", async () => {
+      setButtonLoading(homeDemoBtn, true, "running demo analysis...");
+      try {
+        const response = await fetch("/api/demo-match", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+          showToast("demo analysis completed successfully.", "success");
+          setTimeout(() => {
+            window.location.href = data.redirect_url;
+          }, 400);
+        } else {
+          setButtonLoading(homeDemoBtn, false);
+          showToast(data.error || "demo analysis failed.", "error");
+        }
+      } catch (err) {
+        setButtonLoading(homeDemoBtn, false);
+        showToast("network error during demo match.", "error");
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

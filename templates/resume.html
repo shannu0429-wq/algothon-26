@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}my resume — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">📊</span>
+          <span>dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link active">
+          <span class="sidebar-icon">📄</span>
+          <span>my resume</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚡</span>
+          <span>job matcher</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">💼</span>
+          <span>job search</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🕒</span>
+          <span>match history</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🎯</span>
+          <span>skills</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.database_details_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">🗄️</span>
+          <span>database</span>
+        </a>
+      </li>
+      <div class="sidebar-divider"></div>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">👤</span>
+          <span>profile</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
+          <span class="sidebar-icon">⚙️</span>
+          <span>settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
+          <span class="sidebar-icon">🚪</span>
+          <span>logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 class="dashboard-title">candidate profile</h1>
+        <p class="dashboard-subtitle">verified information extracted from your uploaded resume.</p>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('resume.upload_page') }}" class="btn btn-secondary">upload new resume</a>
+        <a href="{{ url_for('matching.job_matcher_view') }}" class="btn btn-primary">match against jobs</a>
+      </div>
+    </div>
+
+    {% if not resume %}
+      <div class="panel" style="text-align: center; padding: 3rem 1.5rem;">
+        <h2 style="font-size: 1.3rem; margin-bottom: 0.5rem; color: #fff;">no resume on file</h2>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">upload your resume to view your structured candidate profile and detect your full skill matrix.</p>
+        <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">upload resume</a>
+      </div>
+    {% else %}
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">{{ parsed.personal_info.name or user.name }}</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+              source: {{ resume.filename }} &bull; analyzed: {{ resume.uploaded_at.strftime('%b %d, %y') }}
+            </p>
+          </div>
+          <button id="open-edit-resume-btn" class="btn btn-sm btn-outline">edit details</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; background: rgba(10, 15, 29, 0.4); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div>
+            <span style="font-size: 0.78rem; color: var(--text-dim); display: block;">email</span>
+            <span style="font-size: 0.9rem; color: var(--text-main);">{{ parsed.personal_info.email or user.email }}</span>
+          </div>
+          <div>
+            <span style="font-size: 0.78rem; color: var(--text-dim); display: block;">phone</span>
+            <span style="font-size: 0.9rem; color: var(--text-main);">{{ parsed.personal_info.phone or "not detected" }}</span>
+          </div>
+          <div>
+            <span style="font-size: 0.78rem; color: var(--text-dim); display: block;">location</span>
+            <span style="font-size: 0.9rem; color: var(--text-main);">{{ parsed.personal_info.location or user.location or "not detected" }}</span>
+          </div>
+          <div>
+            <span style="font-size: 0.78rem; color: var(--text-dim); display: block;">links</span>
+            <span style="font-size: 0.88rem;">
+              {% if parsed.personal_info.linkedin or user.linkedin %}
+                <a href="{{ parsed.personal_info.linkedin or user.linkedin }}" target="_blank" style="margin-right: 0.5rem;">linkedin</a>
+              {% endif %}
+              {% if parsed.personal_info.github or user.github %}
+                <a href="{{ parsed.personal_info.github or user.github }}" target="_blank" style="margin-right: 0.5rem;">github</a>
+              {% endif %}
+              {% if parsed.personal_info.portfolio or user.portfolio %}
+                <a href="{{ parsed.personal_info.portfolio or user.portfolio }}" target="_blank">portfolio</a>
+              {% endif %}
+              {% if not (parsed.personal_info.linkedin or user.linkedin or parsed.personal_info.github or user.github) %}
+                <span style="color: var(--text-dim);">not detected</span>
+              {% endif %}
+            </span>
+          </div>
+        </div>
+
+        {% if parsed.summary %}
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">professional summary</h3>
+            <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6;">{{ parsed.summary }}</p>
+          </div>
+        {% endif %}
+
+        <div style="margin-bottom: 2rem;">
+          <h3 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 0.85rem;">categorized skills</h3>
+          {% if parsed.skills_by_category %}
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              {% for category, skill_list in parsed.skills_by_category.items() %}
+                <div>
+                  <h4 style="font-size: 0.82rem; font-weight: 600; color: var(--primary-light); text-transform: lowercase; margin-bottom: 0.4rem;">
+                    {{ category }}
+                  </h4>
+                  <div class="skills-badge-wrap">
+                    {% for s in skill_list %}
+                      <span class="skill-tag matched">{{ s }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--text-dim); font-size: 0.9rem;">no technical skills detected.</p>
+          {% endif %}
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+          <h3 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 0.85rem;">work experience</h3>
+          {% if parsed.experience %}
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+              {% for exp in parsed.experience %}
+                <div style="border-left: 2px solid var(--primary); padding-left: 1rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+                    <div>
+                      <h4 style="font-size: 1rem; font-weight: 700; color: #fff;">{{ exp.title }}</h4>
+                      <p style="font-size: 0.88rem; color: var(--text-muted);">{{ exp.company }}</p>
+                    </div>
+                    <span class="badge badge-secondary">{{ exp.duration }}</span>
+                  </div>
+                  {% if exp.responsibilities %}
+                    <ul style="margin: 0.5rem 0 0.5rem 1.25rem; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+                      {% for resp in exp.responsibilities %}
+                        <li>{{ resp }}</li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+                  {% if exp.technologies %}
+                    <div class="skills-badge-wrap" style="margin-top: 0.5rem;">
+                      {% for t in exp.technologies %}
+                        <span class="skill-tag" style="font-size: 0.75rem;">{{ t }}</span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--text-dim); font-size: 0.9rem;">no structured work experience detected.</p>
+          {% endif %}
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div>
+            <h3 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 0.85rem;">education</h3>
+            {% if parsed.education %}
+              {% for edu in parsed.education %}
+                <div style="background: rgba(10, 15, 29, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 0.75rem;">
+                  <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff;">{{ edu.degree }}</h4>
+                  <p style="font-size: 0.88rem; color: var(--text-muted);">{{ edu.institution }}</p>
+                  <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem; font-size: 0.8rem; color: var(--text-dim);">
+                    {% if edu.graduation_year %}<span>year: {{ edu.graduation_year }}</span>{% endif %}
+                    {% if edu.gpa %}<span>gpa: {{ edu.gpa }}</span>{% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p style="color: var(--text-dim); font-size: 0.9rem;">no education credentials detected.</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <h3 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 0.85rem;">certifications</h3>
+            {% if parsed.certifications %}
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                {% for cert in parsed.certifications %}
+                  <div style="background: rgba(10, 15, 29, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem 1rem; font-size: 0.88rem; color: var(--text-main);">
+                    ✦ {{ cert }}
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p style="color: var(--text-dim); font-size: 0.9rem;">no certifications detected in resume.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if parsed.projects %}
+          <div>
+            <h3 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 0.85rem;">projects</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+              {% for p in parsed.projects %}
+                <div style="background: rgba(10, 15, 29, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem;">
+                  <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.3rem;">{{ p.name }}</h4>
+                  <p style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.6rem;">{{ p.description }}</p>
+                  {% if p.technologies %}
+                    <div class="skills-badge-wrap">
+                      {% for tech in p.technologies %}
+                        <span class="skill-tag" style="font-size: 0.72rem;">{{ tech }}</span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div id="edit-resume-modal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 999; align-items: center; justify-content: center; padding: 1rem;">
+        <div class="card" style="max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto;">
+          <div class="panel-header">
+            <h3 class="panel-title">edit candidate profile</h3>
+            <button id="close-edit-modal-btn" class="toast-close" style="font-size: 1.5rem;">&times;</button>
+          </div>
+          <form id="resume-edit-form">
+            <div class="form-group">
+              <label class="form-label" for="edit-name">full name</label>
+              <input type="text" id="edit-name" class="form-control" value="{{ parsed.personal_info.name or user.name }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-email">email</label>
+              <input type="email" id="edit-email" class="form-control" value="{{ parsed.personal_info.email or user.email }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-phone">phone</label>
+              <input type="text" id="edit-phone" class="form-control" value="{{ parsed.personal_info.phone }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-location">location</label>
+              <input type="text" id="edit-location" class="form-control" value="{{ parsed.personal_info.location or user.location }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-summary">professional summary</label>
+              <textarea id="edit-summary" class="form-control" rows="3">{{ parsed.summary }}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-skills">skills (comma-separated)</label>
+              <input type="text" id="edit-skills" class="form-control" value="{{ parsed.skills|join(', ') }}">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+              <button type="button" id="cancel-edit-btn" class="btn btn-secondary">cancel</button>
+              <button type="submit" id="save-resume-changes-btn" class="btn btn-primary">save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("edit-resume-modal");
+  const openBtn = document.getElementById("open-edit-resume-btn");
+  const closeBtn = document.getElementById("close-edit-modal-btn");
+  const cancelBtn = document.getElementById("cancel-edit-btn");
+
+  if (openBtn && modal) {
+    openBtn.addEventListener("click", () => {
+      modal.style.display = "flex";
+    });
+  }
+
+  function hideModal() {
+    if (modal) modal.style.display = "none";
+  }
+
+  if (closeBtn) closeBtn.addEventListener("click", hideModal);
+  if (cancelBtn) cancelBtn.addEventListener("click", hideModal);
+});
+</script>
+{% endblock %}
