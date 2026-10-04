@@ -41,8 +41,7 @@
             <p style="font-size: 0.88rem; color: var(--text-muted);">you need an analyzed resume in your profile before running custom job matching.</p>
           </div>
           <div style="display: flex; gap: 0.6rem;">
-            <a href="{{ url_for('resume.upload_page') }}" class="btn btn-sm btn-primary">upload resume</a>
-            <button id="matcher-demo-btn-inline" class="btn btn-sm btn-accent">try demo candidate</button>
+            <a href="{{ url_for('resume.upload_page') }}" class="btn btn-sm btn-primary">upload or create resume</a>
           </div>
         </div>
       </div>
@@ -194,23 +193,4 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/matcher.js') }}"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const inlineDemo = document.getElementById("matcher-demo-btn-inline");
-  if (inlineDemo) {
-    inlineDemo.addEventListener("click", async () => {
-      inlineDemo.disabled = true;
-      inlineDemo.textContent = "logging in demo...";
-      try {
-        const resp = await fetch("/demo-login");
-        if (resp.ok) {
-          window.location.reload();
-        }
-      } catch (err) {
-        window.location.href = "/demo-login";
-      }
-    });
-  }
-});
-</script>
 {% endblock %}

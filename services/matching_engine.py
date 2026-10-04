@@ -98,11 +98,16 @@ def calculate_skills_score(resume_skills, job_req_skills, job_pref_skills):
                     missing.append(pref)
 
     total_req_count = max(len(norm_req), 1)
-    req_match_ratio = len([m for m in matched if m in norm_req]) / total_req_count
-    partial_ratio = len(partial) / total_req_count
+    req_matched_count = len([m for m in matched if m in norm_req])
+    req_match_ratio = req_matched_count / total_req_count
+    partial_ratio = min(len(partial) / total_req_count, max(1.0 - req_match_ratio, 0.0))
     pref_match_ratio = (len([m for m in matched if m in norm_pref]) / max(len(norm_pref), 1)) if norm_pref else 1.0
 
-    skill_score = (req_match_ratio * 75.0) + (partial_ratio * 15.0) + (pref_match_ratio * 10.0)
+    if norm_pref:
+        skill_score = (req_match_ratio * 85.0) + (partial_ratio * 10.0) + (pref_match_ratio * 15.0)
+    else:
+        skill_score = (req_match_ratio * 90.0) + (partial_ratio * 10.0)
+
     skill_score = min(max(skill_score, 0.0), 100.0)
 
     return {
@@ -189,24 +194,38 @@ def calculate_education_score(resume_education, job_education_text, domain_align
 
     return min(max(round(highest_score, 1), 20.0), 100.0)
 
-def calculate_project_score(resume_projects, job_text, domain_aligned=True):
+def calculate_project_score(resume_projects, job_text, job_skills=None, domain_aligned=True):
     if not resume_projects:
         return 20.0
 
     if not domain_aligned:
         return 10.0
 
+    target_skills = {normalize_skill(s) for s in (job_skills or []) if s}
     proj_texts = []
+    matched_proj_skills = set()
+
     for p in resume_projects:
         name = p.get("name", "")
         desc = p.get("description", "")
-        techs = " ".join(p.get("technologies", []))
-        proj_texts.append(f"{name} {desc} {techs}".strip())
+        techs = [normalize_skill(t) for t in p.get("technologies", []) if t]
+        matched_proj_skills.update(set(techs).intersection(target_skills))
+
+        proj_str = f"{name} {desc} {' '.join(techs)}".lower()
+        for sk in target_skills:
+            if re.search(r"\b" + re.escape(sk) + r"\b", proj_str):
+                matched_proj_skills.add(sk)
+        proj_texts.append(proj_str.strip())
 
     combined_projects = " \n ".join(proj_texts)
     sim = compute_semantic_similarity(combined_projects, job_text)
-    
-    score = (sim * 80.0) + (min(len(resume_projects), 3) * 6.6)
+
+    if target_skills:
+        tech_ratio = min(len(matched_proj_skills) / min(max(len(target_skills) // 2, 2), 4), 1.0)
+    else:
+        tech_ratio = 0.5
+
+    score = (tech_ratio * 60.0) + (sim * 25.0) + (min(len(resume_projects), 2) * 7.5)
     return min(max(round(score, 1), 15.0), 100.0)
 
 def get_match_category(score, is_domain_mismatch=False):
@@ -313,6 +332,7 @@ def match_resume_to_job(parsed_resume, job_data, raw_resume_text="", raw_job_tex
     resume_skills = parsed_resume.get("skills", [])
     job_req_skills = job_data.get("required_skills", [])
     job_pref_skills = job_data.get("preferred_skills", [])
+    all_job_skills = job_req_skills + job_pref_skills
 
     skills_res = calculate_skills_score(resume_skills, job_req_skills, job_pref_skills)
     skill_score = skills_res["score"]
@@ -321,7 +341,7 @@ def match_resume_to_job(parsed_resume, job_data, raw_resume_text="", raw_job_tex
     resume_full_text = (raw_resume_text or " ".join(resume_skills) + " " + parsed_resume.get("summary", "")).lower()
 
     cand_domain, cand_pts = detect_domain(resume_skills, resume_full_text)
-    job_domain, job_pts = detect_domain(job_req_skills + job_pref_skills, job_full_text)
+    job_domain, job_pts = detect_domain(all_job_skills, job_full_text)
 
     is_domain_mismatch = (
         cand_domain != "general" and
@@ -334,13 +354,13 @@ def match_resume_to_job(parsed_resume, job_data, raw_resume_text="", raw_job_tex
 
     exp_score = calculate_experience_score(parsed_resume.get("experience", []), job_data.get("experience", "1-3 years"), domain_aligned=domain_aligned)
     edu_score = calculate_education_score(parsed_resume.get("education", []), job_data.get("education", "bachelor's degree"), domain_aligned=domain_aligned, job_domain=job_domain, cand_domain=cand_domain)
-    proj_score = calculate_project_score(parsed_resume.get("projects", []), job_full_text, domain_aligned=domain_aligned)
+    proj_score = calculate_project_score(parsed_resume.get("projects", []), job_full_text, job_skills=all_job_skills, domain_aligned=domain_aligned)
 
     sem_similarity = compute_semantic_similarity(resume_full_text, job_full_text)
     raw_sem_score = round(sem_similarity * 100.0, 1)
 
     if is_domain_mismatch:
-        semantic_score = min(raw_sem_score * 0.25, 12.0)
+        semantic_score = min(raw_sem_score * 0.25, 10.0)
         skill_score = 0.0
         exp_score = min(exp_score, 12.0)
         edu_score = min(edu_score, 15.0)
@@ -352,12 +372,16 @@ def match_resume_to_job(parsed_resume, job_data, raw_resume_text="", raw_job_tex
             edu_score = min(edu_score * 0.4, 30.0)
             proj_score = min(proj_score * 0.3, 20.0)
         else:
-            semantic_score = min(max(raw_sem_score, 10.0), 100.0)
+            req_skills = [normalize_skill(s) for s in job_req_skills if s]
+            req_matched = len([m for m in skills_res["matched"] if m in req_skills])
+            req_ratio = req_matched / max(len(req_skills), 1)
+            sem_boost = req_ratio * 88.0
+            semantic_score = min(max(raw_sem_score, sem_boost), 96.0)
 
     overall = (
-        (skill_score * 0.40) +
+        (skill_score * 0.45) +
         (exp_score * 0.20) +
-        (semantic_score * 0.20) +
+        (semantic_score * 0.15) +
         (edu_score * 0.10) +
         (proj_score * 0.10)
     )

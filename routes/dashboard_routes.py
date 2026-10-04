@@ -131,6 +131,127 @@ def profile_view():
         candidate_domain=cand_domain
     )
 
+@dashboard_bp.route("/api/profile/skills/add", methods=["POST"])
+@login_required
+def api_add_profile_skill():
+    user_id = session.get("user_id")
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"success": False, "error": "user not authenticated."}), 401
+
+    data = request.get_json() or request.form.to_dict() or {}
+    raw_skill = data.get("skill", "").strip().lower()
+
+    if not raw_skill:
+        return jsonify({"success": False, "error": "please specify a skill name."}), 400
+
+    from services.skill_extractor import normalize_skill, extract_skills
+    norm_sk = normalize_skill(raw_skill)
+
+    latest_resume = Resume.query.filter_by(user_id=user_id).order_by(Resume.uploaded_at.desc()).first()
+    if not latest_resume:
+        initial_text = f"candidate profile for {user.name}.\ntechnical skills: {norm_sk}"
+        parsed = {
+            "personal_info": {"name": user.name, "email": user.email, "location": user.location},
+            "summary": f"candidate profile specialized in {user.career_interests or norm_sk}.",
+            "skills": [norm_sk],
+            "skills_by_category": {"programming_languages": [norm_sk]},
+            "experience": [],
+            "education": [],
+            "projects": [],
+            "certifications": []
+        }
+        latest_resume = Resume(
+            user_id=user_id,
+            filename="profile_skills_resume.txt",
+            extracted_text=initial_text
+        )
+        latest_resume.set_parsed_data(parsed)
+        db.session.add(latest_resume)
+    else:
+        parsed = latest_resume.get_parsed_data()
+        current_skills = parsed.get("skills", [])
+        if norm_sk not in current_skills:
+            current_skills.append(norm_sk)
+            parsed["skills"] = current_skills
+            re_extracted = extract_skills(" ".join(current_skills))
+            parsed["skills_by_category"] = re_extracted["skills_by_category"]
+            latest_resume.set_parsed_data(parsed)
+            latest_resume.extracted_text += f"\n{norm_sk}"
+
+    existing_skill_record = Skill.query.filter_by(name=norm_sk).first()
+    if not existing_skill_record:
+        cat = "technical skills"
+        for c, sk_list in parsed.get("skills_by_category", {}).items():
+            if norm_sk in sk_list:
+                cat = c.replace("_", " ")
+                break
+        new_sk = Skill(name=norm_sk, category=cat)
+        db.session.add(new_sk)
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": f"skill '{norm_sk}' added successfully.",
+        "skills": parsed.get("skills", []),
+        "skill": norm_sk
+    })
+
+@dashboard_bp.route("/api/profile/skills/remove", methods=["POST"])
+@login_required
+def api_remove_profile_skill():
+    user_id = session.get("user_id")
+    latest_resume = Resume.query.filter_by(user_id=user_id).order_by(Resume.uploaded_at.desc()).first()
+    if not latest_resume:
+        return jsonify({"success": False, "error": "no active resume or profile found."}), 404
+
+    data = request.get_json() or request.form.to_dict() or {}
+    target_skill = data.get("skill", "").strip().lower()
+
+    from services.skill_extractor import normalize_skill, extract_skills
+    norm_sk = normalize_skill(target_skill)
+
+    parsed = latest_resume.get_parsed_data()
+    current_skills = parsed.get("skills", [])
+    if norm_sk in current_skills:
+        current_skills = [s for s in current_skills if s != norm_sk]
+        parsed["skills"] = current_skills
+        re_extracted = extract_skills(" ".join(current_skills))
+        parsed["skills_by_category"] = re_extracted["skills_by_category"]
+        latest_resume.set_parsed_data(parsed)
+        db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": f"skill '{norm_sk}' removed successfully.",
+        "skills": current_skills
+    })
+
+@dashboard_bp.route("/api/profile/skills/sync", methods=["POST"])
+@login_required
+def api_sync_profile_skills():
+    user_id = session.get("user_id")
+    latest_resume = Resume.query.filter_by(user_id=user_id).order_by(Resume.uploaded_at.desc()).first()
+    if not latest_resume:
+        return jsonify({"success": False, "error": "no active resume to sync."}), 404
+
+    from services.skill_extractor import extract_skills
+    extracted = extract_skills(latest_resume.extracted_text)
+    parsed = latest_resume.get_parsed_data()
+    merged_skills = sorted(list(set(parsed.get("skills", []) + extracted["all_skills"])))
+    parsed["skills"] = merged_skills
+    re_extracted = extract_skills(" ".join(merged_skills))
+    parsed["skills_by_category"] = re_extracted["skills_by_category"]
+    latest_resume.set_parsed_data(parsed)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": f"{len(merged_skills)} skills synchronized from resume.",
+        "skills": merged_skills
+    })
+
 @dashboard_bp.route("/settings", methods=["GET", "POST"])
 @login_required
 def settings_view():
@@ -160,6 +281,54 @@ def settings_view():
         return redirect(url_for("dashboard.settings_view"))
 
     return render_template("settings.html", user=user)
+
+@dashboard_bp.route("/api/account/delete", methods=["POST"])
+@login_required
+def api_delete_account():
+    user_id = session.get("user_id")
+    user = db.session.get(User, user_id)
+    if not user:
+        session.clear()
+        return jsonify({"success": False, "error": "user not found."}), 404
+
+    data = request.get_json() or request.form.to_dict() or {}
+    password = data.get("password", "").strip()
+    confirmation = data.get("confirmation", "").strip().lower()
+
+    if confirmation != "delete" and password and not user.check_password(password):
+        return jsonify({"success": False, "error": "incorrect verification. account deletion aborted."}), 400
+
+    db.session.delete(user)
+    db.session.commit()
+    session.clear()
+
+    return jsonify({
+        "success": True,
+        "message": "your account and all associated data have been permanently deleted.",
+        "redirect_url": url_for("index")
+    })
+
+@dashboard_bp.route("/settings/delete-account", methods=["POST"])
+@login_required
+def delete_account_form():
+    user_id = session.get("user_id")
+    user = db.session.get(User, user_id)
+    if not user:
+        session.clear()
+        return redirect(url_for("index"))
+
+    password = request.form.get("password", "").strip()
+    confirmation = request.form.get("confirmation", "").strip().lower()
+
+    if confirmation != "delete" and not user.check_password(password):
+        flash("please enter your password or type 'delete' to confirm account deletion.", "error")
+        return redirect(url_for("dashboard.settings_view"))
+
+    db.session.delete(user)
+    db.session.commit()
+    session.clear()
+    flash("your account and all associated data have been permanently deleted.", "info")
+    return redirect(url_for("index"))
 
 @dashboard_bp.route("/database")
 def database_details_view():

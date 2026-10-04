@@ -11,10 +11,10 @@
   <main class="dashboard-main">
     <div class="dashboard-header">
       <h1 class="dashboard-title">account settings</h1>
-      <p class="dashboard-subtitle">manage your security settings and account credentials.</p>
+      <p class="dashboard-subtitle">manage your security settings, password, and account preferences.</p>
     </div>
 
-    <div style="max-width: 600px;">
+    <div style="max-width: 640px;">
       <div class="panel">
         <div class="panel-header">
           <h2 class="panel-title">security & password</h2>
@@ -41,7 +41,126 @@
           </div>
         </form>
       </div>
+
+      <div class="panel" id="danger-zone" style="margin-top: 2rem; border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.03);">
+        <div class="panel-header" style="border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
+          <h2 class="panel-title" style="color: #ef4444; display: flex; align-items: center; gap: 0.5rem;">
+            <span>⚠️</span>
+            <span>danger zone</span>
+          </h2>
+        </div>
+
+        <div style="padding-top: 0.5rem;">
+          <h3 style="font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 0.35rem;">delete your account</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem;">
+            permanently delete your candidate profile, uploaded resumes, verified skills, and match history. once deleted, all your data will be permanently wiped from the system and cannot be restored.
+          </p>
+
+          <div id="delete-init-box">
+            <button type="button" id="open-delete-modal-btn" class="btn btn-danger" style="font-size: 0.88rem; padding: 0.45rem 1rem;">
+              delete account
+            </button>
+          </div>
+
+          <div id="delete-confirm-box" style="display: none; margin-top: 1rem; padding: 1.25rem; border-radius: var(--radius-md); background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4);">
+            <h4 style="color: #ef4444; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>🚨</span>
+              <span>are you absolutely sure? please confirm.</span>
+            </h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.85rem;">
+              this action is irreversible. all credentials, uploaded resumes, and compatibility reports for <strong>{{ user.email }}</strong> will be erased.
+            </p>
+
+            <form id="delete-account-ajax-form" method="POST" action="{{ url_for('dashboard.delete_account_form') }}">
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label for="delete-confirmation-input" style="font-size: 0.8rem; color: #fca5a5; display: block; margin-bottom: 0.35rem;">
+                  enter your password or type 'delete' to proceed:
+                </label>
+                <input type="text" id="delete-confirmation-input" name="confirmation" class="form-control form-control-sm" placeholder="type 'delete' or your password" required style="border-color: rgba(239, 68, 68, 0.5);">
+              </div>
+
+              <div style="display: flex; gap: 0.6rem; justify-content: flex-end; flex-wrap: wrap;">
+                <button type="button" id="cancel-delete-btn" class="btn btn-sm btn-secondary">
+                  cancel, keep my account
+                </button>
+                <button type="submit" id="final-delete-btn" class="btn btn-sm btn-danger">
+                  yes, permanently delete account
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const openBtn = document.getElementById("open-delete-modal-btn");
+  const cancelBtn = document.getElementById("cancel-delete-btn");
+  const confirmBox = document.getElementById("delete-confirm-box");
+  const initBox = document.getElementById("delete-init-box");
+  const deleteForm = document.getElementById("delete-account-ajax-form");
+  const confirmInput = document.getElementById("delete-confirmation-input");
+  const finalBtn = document.getElementById("final-delete-btn");
+
+  if (openBtn && confirmBox && initBox) {
+    openBtn.addEventListener("click", () => {
+      initBox.style.display = "none";
+      confirmBox.style.display = "block";
+      if (confirmInput) confirmInput.focus();
+    });
+  }
+
+  if (cancelBtn && confirmBox && initBox) {
+    cancelBtn.addEventListener("click", () => {
+      confirmBox.style.display = "none";
+      initBox.style.display = "block";
+      if (confirmInput) confirmInput.value = "";
+    });
+  }
+
+  if (deleteForm) {
+    deleteForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const val = (confirmInput ? confirmInput.value : "").trim();
+      if (!val) {
+        showToast("please enter your password or type 'delete' to confirm.", "warning");
+        return;
+      }
+
+      const confirmed = window.confirm("final confirmation: are you completely sure you want to delete your jobalign ai account? this cannot be undone.");
+      if (!confirmed) {
+        return;
+      }
+
+      if (finalBtn) setButtonLoading(finalBtn, true, "deleting account...");
+
+      try {
+        const resp = await fetch("/api/account/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirmation: val, password: val })
+        });
+        const data = await resp.json();
+        if (resp.ok && data.success) {
+          showToast("your account has been permanently deleted.", "success");
+          setTimeout(() => {
+            window.location.href = data.redirect_url || "/";
+          }, 600);
+        } else {
+          if (finalBtn) setButtonLoading(finalBtn, false);
+          showToast(data.error || "account deletion failed. please verify input.", "error");
+        }
+      } catch (err) {
+        if (finalBtn) setButtonLoading(finalBtn, false);
+        showToast("network error during account deletion.", "error");
+      }
+    });
+  }
+});
+</script>
 {% endblock %}

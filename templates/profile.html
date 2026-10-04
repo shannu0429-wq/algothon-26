@@ -37,10 +37,10 @@
       <div class="profile-completion-bar">
         <div class="completion-info">
           <span>profile strength</span>
-          <span class="completion-percent">94% &bull; complete</span>
+          <span class="completion-percent">95% &bull; complete</span>
         </div>
         <div class="progress-bar-bg">
-          <div class="progress-bar-fill" style="width: 94%;"></div>
+          <div class="progress-bar-fill" style="width: 95%;"></div>
         </div>
       </div>
     </div>
@@ -68,7 +68,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span class="profile-info-label">active resume</span>
               {% if latest_resume %}
-                <span class="badge badge-primary">{{ latest_resume.file_type|upper }}</span>
+                <span class="badge badge-primary">{{ latest_resume.filename.split('.')[-1]|upper }}</span>
               {% endif %}
             </div>
             {% if latest_resume %}
@@ -77,7 +77,7 @@
                   📄 {{ latest_resume.filename }}
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">
-                  uploaded {{ latest_resume.uploaded_at.strftime('%b %d, %Y') if latest_resume.uploaded_at else 'recently' }} &bull; {{ detected_skills|length }} skills identified
+                  uploaded {{ latest_resume.uploaded_at.strftime('%b %d, %Y') if latest_resume.uploaded_at else 'recently' }} &bull; <span id="resume-skill-count-sub">{{ detected_skills|length }}</span> skills identified
                 </div>
                 <div style="margin-top: 0.6rem; display: flex; gap: 0.5rem;">
                   <a href="{{ url_for('resume.view_resume') }}" class="btn btn-xs btn-outline">view full parsed resume</a>
@@ -86,24 +86,47 @@
               </div>
             {% else %}
               <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">no resume uploaded yet.</p>
-              <a href="{{ url_for('resume.upload_page') }}" class="btn btn-sm btn-primary" style="margin-top: 0.5rem;">upload your resume</a>
+              <a href="{{ url_for('resume.upload_page') }}" class="btn btn-sm btn-primary" style="margin-top: 0.5rem;">upload or create resume</a>
             {% endif %}
           </div>
 
           <div class="profile-info-block">
-            <span class="profile-info-label">verified technical skills ({{ detected_skills|length }})</span>
-            <div class="skills-chips-wrapper" style="margin-top: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="profile-info-label">verified technical skills (<span id="profile-skills-count">{{ detected_skills|length }}</span>)</span>
+              {% if latest_resume %}
+                <button type="button" id="btn-sync-skills" class="btn btn-xs btn-outline" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;" title="rescan and sync skills from resume text">
+                  🔄 sync from resume
+                </button>
+              {% endif %}
+            </div>
+
+            <div id="profile-skills-container" class="skills-chips-wrapper" style="margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem;">
               {% if detected_skills %}
                 {% for skill in detected_skills %}
-                  <span class="skill-tag skill-matched">✓ {{ skill }}</span>
+                  <span class="skill-tag skill-matched profile-skill-pill" data-skill="{{ skill }}" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.65rem;">
+                    <span>✓ {{ skill }}</span>
+                    <button type="button" class="remove-skill-btn" data-skill="{{ skill }}" style="background: none; border: none; color: inherit; cursor: pointer; opacity: 0.6; padding: 0; font-size: 0.9rem; line-height: 1;" title="remove skill">&times;</button>
+                  </span>
                 {% endfor %}
               {% else %}
-                <span class="skill-tag">python</span>
-                <span class="skill-tag">javascript</span>
-                <span class="skill-tag">sql</span>
-                <span class="skill-tag">react</span>
-                <span class="skill-tag">git</span>
+                <p id="no-skills-msg" style="font-size: 0.82rem; color: var(--text-muted);">no skills identified yet. add skills below or upload your resume.</p>
               {% endif %}
+            </div>
+
+            <div style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px dashed var(--border-color);">
+              <label for="add-skill-input" style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">add technical skill to profile</label>
+              <div style="display: flex; gap: 0.4rem;">
+                <input type="text" id="add-skill-input" placeholder="e.g. docker, aws, celery, react..." class="form-control form-control-sm" style="font-size: 0.84rem;">
+                <button type="button" id="btn-add-skill" class="btn btn-sm btn-primary" style="white-space: nowrap; font-size: 0.82rem; padding: 0.35rem 0.75rem;">+ add skill</button>
+              </div>
+              <div id="quick-suggestions-wrap" style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center;">
+                <span style="font-size: 0.74rem; color: var(--text-dim);">quick suggestions:</span>
+                {% for s in ['aws', 'celery', 'docker', 'kubernetes', 'redis', 'react', 'fastapi', 'postgresql', 'typescript'] %}
+                  {% if s not in detected_skills %}
+                    <button type="button" class="btn btn-xs btn-outline quick-add-skill-btn" data-skill="{{ s }}" style="font-size: 0.72rem; padding: 0.15rem 0.45rem;">+ {{ s }}</button>
+                  {% endif %}
+                {% endfor %}
+              </div>
             </div>
           </div>
 
@@ -168,9 +191,12 @@
               <input type="url" id="profile-portfolio" name="portfolio" class="form-control" placeholder="https://yourportfolio.dev" value="{{ user.portfolio or '' }}">
             </div>
 
-            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
-              <button type="submit" class="btn btn-primary">save profile changes</button>
-              <a href="{{ url_for('dashboard.dashboard_view') }}" class="btn btn-secondary">back to dashboard</a>
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <div style="display: flex; gap: 0.75rem;">
+                <button type="submit" class="btn btn-primary">save profile changes</button>
+                <a href="{{ url_for('dashboard.dashboard_view') }}" class="btn btn-secondary">back to dashboard</a>
+              </div>
+              <a href="{{ url_for('dashboard.settings_view') }}#danger-zone" class="btn btn-sm btn-outline" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">⚙️ manage / delete account</a>
             </div>
           </form>
         </div>
@@ -178,4 +204,155 @@
     </div>
   </main>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("profile-skills-container");
+  const countBadge = document.getElementById("profile-skills-count");
+  const countSub = document.getElementById("resume-skill-count-sub");
+  const input = document.getElementById("add-skill-input");
+  const addBtn = document.getElementById("btn-add-skill");
+  const syncBtn = document.getElementById("btn-sync-skills");
+  const noSkillsMsg = document.getElementById("no-skills-msg");
+
+  function renderSkills(skills) {
+    if (!container) return;
+    container.innerHTML = "";
+    if (!skills || skills.length === 0) {
+      container.innerHTML = '<p id="no-skills-msg" style="font-size: 0.82rem; color: var(--text-muted);">no skills identified yet. add skills below or upload your resume.</p>';
+      if (countBadge) countBadge.textContent = "0";
+      if (countSub) countSub.textContent = "0";
+      return;
+    }
+
+    skills.forEach((sk) => {
+      const span = document.createElement("span");
+      span.className = "skill-tag skill-matched profile-skill-pill";
+      span.setAttribute("data-skill", sk);
+      span.style.cssText = "display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.65rem;";
+
+      const text = document.createElement("span");
+      text.textContent = `✓ ${sk}`;
+
+      const rmBtn = document.createElement("button");
+      rmBtn.type = "button";
+      rmBtn.className = "remove-skill-btn";
+      rmBtn.setAttribute("data-skill", sk);
+      rmBtn.style.cssText = "background: none; border: none; color: inherit; cursor: pointer; opacity: 0.6; padding: 0; font-size: 0.9rem; line-height: 1;";
+      rmBtn.setAttribute("title", "remove skill");
+      rmBtn.innerHTML = "&times;";
+
+      span.appendChild(text);
+      span.appendChild(rmBtn);
+      container.appendChild(span);
+    });
+
+    if (countBadge) countBadge.textContent = skills.length;
+    if (countSub) countSub.textContent = skills.length;
+    attachRemoveHandlers();
+  }
+
+  async function addSkill(skillName) {
+    const clean = (skillName || "").trim().toLowerCase();
+    if (!clean) return;
+
+    try {
+      const resp = await fetch("/api/profile/skills/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ skill: clean })
+      });
+      const data = await resp.json();
+      if (resp.ok && data.success) {
+        showToast(`skill '${data.skill}' added to candidate profile.`, "success");
+        renderSkills(data.skills);
+        if (input) input.value = "";
+        const quickBtn = document.querySelector(`.quick-add-skill-btn[data-skill="${data.skill}"]`);
+        if (quickBtn) quickBtn.remove();
+      } else {
+        showToast(data.error || "failed to add skill.", "error");
+      }
+    } catch (err) {
+      showToast("network error adding skill.", "error");
+    }
+  }
+
+  async function removeSkill(skillName) {
+    const clean = (skillName || "").trim().toLowerCase();
+    if (!clean) return;
+
+    try {
+      const resp = await fetch("/api/profile/skills/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ skill: clean })
+      });
+      const data = await resp.json();
+      if (resp.ok && data.success) {
+        showToast(`skill '${clean}' removed.`, "info");
+        renderSkills(data.skills);
+      } else {
+        showToast(data.error || "failed to remove skill.", "error");
+      }
+    } catch (err) {
+      showToast("network error removing skill.", "error");
+    }
+  }
+
+  function attachRemoveHandlers() {
+    document.querySelectorAll(".remove-skill-btn").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const sk = btn.getAttribute("data-skill");
+        removeSkill(sk);
+      };
+    });
+  }
+
+  attachRemoveHandlers();
+
+  if (addBtn && input) {
+    addBtn.addEventListener("click", () => addSkill(input.value));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addSkill(input.value);
+      }
+    });
+  }
+
+  document.querySelectorAll(".quick-add-skill-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sk = btn.getAttribute("data-skill");
+      addSkill(sk);
+    });
+  });
+
+  if (syncBtn) {
+    syncBtn.addEventListener("click", async () => {
+      setButtonLoading(syncBtn, true, "syncing...");
+      try {
+        const resp = await fetch("/api/profile/skills/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await resp.json();
+        setButtonLoading(syncBtn, false);
+        if (resp.ok && data.success) {
+          showToast(data.message, "success");
+          renderSkills(data.skills);
+        } else {
+          showToast(data.error || "sync failed.", "error");
+        }
+      } catch (err) {
+        setButtonLoading(syncBtn, false);
+        showToast("network error syncing skills.", "error");
+      }
+    });
+  }
+});
+</script>
 {% endblock %}

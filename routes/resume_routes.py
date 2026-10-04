@@ -48,7 +48,6 @@ def api_upload_resume():
         }), 400
 
     orig_name = secure_filename(file.filename).lower()
-    ext = orig_name.rsplit(".", 1)[-1]
     unique_filename = f"{uuid.uuid4().hex[:12]}_{orig_name}"
     
     upload_dir = current_app.config["RESUME_UPLOAD_FOLDER"]
@@ -99,7 +98,53 @@ def api_upload_resume():
         "message": "resume uploaded and analyzed successfully.",
         "resume_id": new_resume.id,
         "parsed_data": parsed_data,
-        "redirect_url": url_for("resume.view_resume")
+        "redirect_url": url_for("dashboard.profile_view")
+    })
+
+@resume_bp.route("/api/resume/create-from-text", methods=["POST"])
+@login_required
+def api_create_resume_from_text():
+    data = request.get_json() or request.form.to_dict() or {}
+    description = data.get("description", "").strip()
+
+    if not description or len(description) < 20:
+        return jsonify({
+            "success": False,
+            "error": "please provide a detailed description (at least 20 characters) with your background, skills, or experience."
+        }), 400
+
+    parsed_data = parse_resume_content(description)
+
+    user_id = session.get("user_id")
+    user = db.session.get(User, user_id)
+    if user:
+        p_info = parsed_data.get("personal_info", {})
+        candidate_name = data.get("name", "").strip().lower() or p_info.get("name", "").lower()
+        if candidate_name and (not user.name or user.name == "new user"):
+            user.name = candidate_name
+        candidate_location = data.get("location", "").strip().lower() or p_info.get("location", "").lower()
+        if candidate_location and not user.location:
+            user.location = candidate_location
+        candidate_role = data.get("target_role", "").strip().lower()
+        if candidate_role:
+            user.career_interests = candidate_role
+
+    new_resume = Resume(
+        user_id=user_id,
+        filename="profile_description_resume.txt",
+        extracted_text=description
+    )
+    new_resume.set_parsed_data(parsed_data)
+    db.session.add(new_resume)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "candidate resume generated and skills identified successfully.",
+        "resume_id": new_resume.id,
+        "parsed_data": parsed_data,
+        "skills": parsed_data.get("skills", []),
+        "redirect_url": url_for("dashboard.profile_view")
     })
 
 @resume_bp.route("/api/resume/<int:resume_id>", methods=["GET"])

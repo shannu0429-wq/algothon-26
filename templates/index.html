@@ -25,7 +25,6 @@
       {% else %}
         <a href="{{ url_for('auth.register') }}" class="btn btn-lg btn-primary">analyze my resume</a>
         <a href="{{ url_for('job.jobs_view') }}" class="btn btn-lg btn-secondary">explore jobs</a>
-        <button id="home-demo-trigger-btn" class="btn btn-lg btn-accent">try demo</button>
       {% endif %}
     </div>
 
@@ -178,33 +177,4 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const homeDemoBtn = document.getElementById("home-demo-trigger-btn");
-  if (homeDemoBtn) {
-    homeDemoBtn.addEventListener("click", async () => {
-      setButtonLoading(homeDemoBtn, true, "running demo analysis...");
-      try {
-        const response = await fetch("/api/demo-match", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" }
-        });
-        const data = await response.json();
-        if (response.ok && data.success) {
-          showToast("demo analysis completed successfully.", "success");
-          setTimeout(() => {
-            window.location.href = data.redirect_url;
-          }, 400);
-        } else {
-          setButtonLoading(homeDemoBtn, false);
-          showToast(data.error || "demo analysis failed.", "error");
-        }
-      } catch (err) {
-        setButtonLoading(homeDemoBtn, false);
-        showToast("network error during demo match.", "error");
-      }
-    });
-  }
-});
-</script>
 {% endblock %}

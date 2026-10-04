@@ -99,8 +99,7 @@
           upload your resume to unlock real-time ai matching, skill extraction, and personalized career gap recommendations.
         </p>
         <div style="display: flex; gap: 0.8rem; justify-content: center;">
-          <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">upload resume</a>
-          <button id="dashboard-demo-btn" class="btn btn-accent">try demo</button>
+          <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">upload or create resume</a>
         </div>
       </div>
     {% endif %}
@@ -244,28 +243,4 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const demoBtn = document.getElementById("dashboard-demo-btn");
-  if (demoBtn) {
-    demoBtn.addEventListener("click", async () => {
-      setButtonLoading(demoBtn, true, "running demo analysis...");
-      try {
-        const res = await fetch("/api/demo-match", { method: "POST" });
-        const d = await res.json();
-        if (res.ok && d.success) {
-          showToast("demo analysis completed successfully.", "success");
-          setTimeout(() => { window.location.href = d.redirect_url; }, 400);
-        } else {
-          setButtonLoading(demoBtn, false);
-          showToast(d.error || "demo analysis failed.", "error");
-        }
-      } catch (e) {
-        setButtonLoading(demoBtn, false);
-        showToast("network error during demo.", "error");
-      }
-    });
-  }
-});
-</script>
 {% endblock %}

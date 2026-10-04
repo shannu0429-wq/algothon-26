@@ -25,8 +25,16 @@ def compute_tfidf_similarity(text1, text2):
     try:
         vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words="english", max_features=5000)
         tfidf_matrix = vectorizer.fit_transform([text1, text2])
-        sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-        return float(np.clip(sim, 0.0, 1.0))
+        sim = float(cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0])
+        if sim < 0.04:
+            score = sim * 2.0
+        elif sim < 0.10:
+            score = 0.20 + ((sim - 0.04) / 0.06) * 0.35
+        elif sim < 0.22:
+            score = 0.55 + ((sim - 0.10) / 0.12) * 0.35
+        else:
+            score = 0.90 + min((sim - 0.22) * 0.5, 0.10)
+        return float(np.clip(score, 0.0, 1.0))
     except Exception:
         t1_words = set(text1.lower().split())
         t2_words = set(text2.lower().split())
@@ -49,10 +57,10 @@ def compute_semantic_similarity(text1, text2):
         try:
             embeddings = model.encode([clean_t1, clean_t2], convert_to_numpy=True, normalize_embeddings=True)
             dot_prod = float(np.dot(embeddings[0], embeddings[1]))
-            if dot_prod < 0.22:
+            if dot_prod < 0.15:
                 score = max(dot_prod, 0.0) * 0.4
             else:
-                score = 0.088 + ((dot_prod - 0.22) / 0.78) * 0.912
+                score = 0.35 + ((dot_prod - 0.15) / 0.40) * 0.60
             return float(np.clip(score, 0.0, 1.0))
         except Exception:
             pass
@@ -72,10 +80,10 @@ def compute_batch_similarity(query_text, text_list):
             normalized = []
             for s in similarities:
                 val = float(s)
-                if val < 0.22:
+                if val < 0.15:
                     sc = max(val, 0.0) * 0.4
                 else:
-                    sc = 0.088 + ((val - 0.22) / 0.78) * 0.912
+                    sc = 0.35 + ((val - 0.15) / 0.40) * 0.60
                 normalized.append(float(np.clip(sc, 0.0, 1.0)))
             return normalized
         except Exception:

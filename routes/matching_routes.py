@@ -188,91 +188,13 @@ def api_match():
         "result": match_result
     })
 
-@matching_bp.route("/api/demo-match", methods=["POST"])
+@matching_bp.route("/api/demo-match", methods=["POST", "GET"])
 def api_demo_match():
-    user_id = session.get("user_id")
-    if not user_id:
-        user = User.query.filter_by(email="demo@jobalign.ai").first()
-        if not user:
-            user = User(name="alex rivera", email="demo@jobalign.ai")
-            user.set_password("password123")
-            db.session.add(user)
-            db.session.commit()
-        session["user_id"] = user.id
-        session["user_name"] = user.name
-        session["user_email"] = user.email
-    else:
-        user = db.session.get(User, user_id)
-
-    sample_resume = Resume.query.filter_by(user_id=user.id).order_by(Resume.uploaded_at.desc()).first()
-    if not sample_resume:
-        sample_resume_text = (
-            "alex rivera\n"
-            "alex.rivera@example.com | (555) 234-5678 | san francisco, ca\n"
-            "professional summary\n"
-            "results-driven software engineer with 3+ years of experience designing and deploying scalable backend systems, rest apis, and machine learning pipelines. proficient in python, flask, mysql, docker, and cloud environments.\n"
-            "technical skills: python, flask, fastapi, mysql, postgresql, redis, docker, git, rest api, machine learning, deep learning, pytorch, scikit-learn, linux\n"
-            "education: b.s. in computer science, uc berkeley, 2021\n"
-            "experience: software engineer at novatech solutions (2022 - present). built python/flask microservices, optimized mysql queries, deployed with docker.\n"
-            "projects: ai resume analyzer built with python and flask."
-        )
-        parsed = parse_resume_content(sample_resume_text)
-        sample_resume = Resume(user_id=user.id, filename="demo_resume.txt", extracted_text=sample_resume_text)
-        sample_resume.set_parsed_data(parsed)
-        db.session.add(sample_resume)
-        db.session.commit()
-
-    sample_job = Job.query.filter_by(title="python developer").first()
-    if not sample_job:
-        sample_job = Job.query.first()
-
-    parsed_res = sample_resume.get_parsed_data()
-    job_data = {
-        "title": sample_job.title,
-        "company": sample_job.company,
-        "location": sample_job.location,
-        "required_skills": sample_job.get_required_skills(),
-        "preferred_skills": sample_job.get_preferred_skills(),
-        "experience": sample_job.experience_required,
-        "education": sample_job.education_required,
-        "description": sample_job.description
-    }
-
-    match_result = match_resume_to_job(
-        parsed_res,
-        job_data,
-        raw_resume_text=sample_resume.extracted_text,
-        raw_job_text=sample_job.description
-    )
-
-    demo_match = Match(
-        user_id=user.id,
-        resume_id=sample_resume.id,
-        job_id=sample_job.id,
-        job_title=sample_job.title,
-        company_name=sample_job.company,
-        overall_score=match_result["overall_score"],
-        skill_score=match_result["breakdown"]["skill_score"],
-        experience_score=match_result["breakdown"]["experience_score"],
-        semantic_score=match_result["breakdown"]["semantic_score"],
-        education_score=match_result["breakdown"]["education_score"],
-        project_score=match_result["breakdown"]["project_score"]
-    )
-    demo_match.set_matched_skills(match_result["matched_skills"])
-    demo_match.set_missing_skills(match_result["missing_skills"])
-    demo_match.set_partial_skills(match_result["partial_skills"])
-    demo_match.set_explanation(match_result["explanation"])
-    demo_match.set_recommendations(match_result["recommendations"])
-
-    db.session.add(demo_match)
-    db.session.commit()
-
     return jsonify({
-        "success": True,
-        "match_id": demo_match.id,
-        "redirect_url": url_for("matching.match_result_view", match_id=demo_match.id),
-        "result": match_result
-    })
+        "success": False,
+        "error": "demo match disabled. please upload or create your candidate resume to run real matching.",
+        "redirect_url": url_for("resume.upload_page")
+    }), 400
 
 @matching_bp.route("/api/matches", methods=["GET"])
 @login_required
