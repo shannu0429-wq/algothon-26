@@ -49,7 +49,10 @@ def compute_semantic_similarity(text1, text2):
         try:
             embeddings = model.encode([clean_t1, clean_t2], convert_to_numpy=True, normalize_embeddings=True)
             dot_prod = float(np.dot(embeddings[0], embeddings[1]))
-            score = (dot_prod + 1.0) / 2.0
+            if dot_prod < 0.22:
+                score = max(dot_prod, 0.0) * 0.4
+            else:
+                score = 0.088 + ((dot_prod - 0.22) / 0.78) * 0.912
             return float(np.clip(score, 0.0, 1.0))
         except Exception:
             pass
@@ -66,8 +69,15 @@ def compute_batch_similarity(query_text, text_list):
             query_emb = model.encode([query_text], convert_to_numpy=True, normalize_embeddings=True)
             doc_embs = model.encode(text_list, convert_to_numpy=True, normalize_embeddings=True)
             similarities = np.dot(doc_embs, query_emb[0])
-            normalized = [(float(s) + 1.0) / 2.0 for s in similarities]
-            return [float(np.clip(s, 0.0, 1.0)) for s in normalized]
+            normalized = []
+            for s in similarities:
+                val = float(s)
+                if val < 0.22:
+                    sc = max(val, 0.0) * 0.4
+                else:
+                    sc = 0.088 + ((val - 0.22) / 0.78) * 0.912
+                normalized.append(float(np.clip(sc, 0.0, 1.0)))
+            return normalized
         except Exception:
             pass
 

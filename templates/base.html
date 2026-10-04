@@ -10,6 +10,12 @@
   <meta property="og:description" content="ai-driven semantic job and resume matching platform.">
   <meta property="og:url" content="https://jobalign-ai.com{{ request.path }}">
   <meta property="og:type" content="website">
+  <script>
+    (function() {
+      var saved = localStorage.getItem("jobalign_theme") || "dark";
+      document.documentElement.setAttribute("data-theme", saved);
+    })();
+  </script>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
   <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -37,6 +43,9 @@
       </ul>
 
       <div class="nav-actions">
+        <button type="button" class="theme-toggle-nav-btn" id="nav-theme-toggle" aria-label="toggle dark light mode" title="toggle theme">
+          <span class="theme-nav-icon">🌙</span>
+        </button>
         {% if session.get('user_id') %}
           <a href="{{ url_for('matching.job_matcher_view') }}" class="btn btn-sm btn-outline">job matcher</a>
           <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-secondary">logout</a>

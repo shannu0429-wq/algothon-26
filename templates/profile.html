@@ -1,129 +1,181 @@
 {% extends "base.html" %}
 
-{% block title %}profile — jobalign ai{% endblock %}
+{% block title %}user profile — jobalign ai{% endblock %}
 
 {% block content %}
 <div class="dashboard-layout">
-  <aside class="dashboard-sidebar">
-    <ul class="sidebar-menu">
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">📊</span>
-          <span>dashboard</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link">
-          <span class="sidebar-icon">📄</span>
-          <span>my resume</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">⚡</span>
-          <span>job matcher</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">💼</span>
-          <span>job search</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">🕒</span>
-          <span>match history</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">🎯</span>
-          <span>skills</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.database_details_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">🗄️</span>
-          <span>database</span>
-        </a>
-      </li>
-      <div class="sidebar-divider"></div>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link active">
-          <span class="sidebar-icon">👤</span>
-          <span>profile</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">⚙️</span>
-          <span>settings</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
-          <span class="sidebar-icon">🚪</span>
-          <span>logout</span>
-        </a>
-      </li>
-    </ul>
-  </aside>
+  {% with active_page='profile' %}
+    {% include "components/sidebar.html" %}
+  {% endwith %}
 
   <main class="dashboard-main">
-    <div class="dashboard-header">
-      <h1 class="dashboard-title">user profile</h1>
-      <p class="dashboard-subtitle">manage your contact details, professional portfolio, and career interests.</p>
+    <div class="profile-hero-card">
+      <div class="profile-hero-inner">
+        <div class="profile-avatar-large">
+          {{ (user.name or 'u')[:2]|upper }}
+          <span class="profile-verified-badge" title="verified candidate">✓</span>
+        </div>
+        <div class="profile-hero-meta">
+          <div class="profile-title-row">
+            <h1 class="profile-name">{{ user.name }}</h1>
+            <span class="profile-status-pill">active candidate</span>
+          </div>
+          <p class="profile-headline">{{ user.career_interests or 'software engineer & cse specialist' }}</p>
+          <div class="profile-meta-tags">
+            <span class="profile-tag">📍 {{ user.location or 'location not specified' }}</span>
+            <span class="profile-tag">✉️ {{ user.email }}</span>
+            <span class="profile-tag">🎓 computer science & engineering</span>
+            <span class="profile-tag">🕒 joined {{ user.created_at.strftime('%b %Y') if user.created_at else '2026' }}</span>
+          </div>
+        </div>
+        <div class="profile-hero-actions">
+          <a href="{{ url_for('matching.job_matcher_view') }}" class="btn btn-primary">⚡ run ai match</a>
+          <a href="{{ url_for('resume.view_resume') }}" class="btn btn-secondary">📄 view resume</a>
+        </div>
+      </div>
+
+      <div class="profile-completion-bar">
+        <div class="completion-info">
+          <span>profile strength</span>
+          <span class="completion-percent">94% &bull; complete</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width: 94%;"></div>
+        </div>
+      </div>
     </div>
 
-    <div style="max-width: 680px;">
-      <div class="panel">
-        <form id="profile-edit-form" method="POST" action="{{ url_for('dashboard.profile_view') }}">
-          <div class="form-group">
-            <label class="form-label" for="profile-name">full name</label>
-            <input type="text" id="profile-name" name="name" class="form-control" value="{{ user.name }}" required>
+    <div class="dashboard-grid profile-grid">
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">ai career credentials</h2>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="profile-email">email address</label>
-            <input type="email" id="profile-email" name="email" class="form-control" value="{{ user.email }}" readonly style="opacity: 0.7; cursor: not-allowed;">
+          <div class="profile-info-block">
+            <span class="profile-info-label">engineering domain</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem;">
+              <span class="badge badge-success" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+                💻 {{ candidate_domain.replace('_', ' ') if candidate_domain else 'computer science & engineering' }}
+              </span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
+              high compatibility profile for software development, backend systems, and data pipelines.
+            </p>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="profile-location">location</label>
-            <input type="text" id="profile-location" name="location" class="form-control" placeholder="e.g. san francisco, ca" value="{{ user.location or '' }}">
+          <div class="profile-info-block">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="profile-info-label">active resume</span>
+              {% if latest_resume %}
+                <span class="badge badge-primary">{{ latest_resume.file_type|upper }}</span>
+              {% endif %}
+            </div>
+            {% if latest_resume %}
+              <div class="active-resume-card" style="margin-top: 0.5rem; padding: 0.75rem; border-radius: 8px; background: var(--bg-surface); border: 1px solid var(--border-color);">
+                <div style="font-weight: 500; font-size: 0.9rem; word-break: break-all;">
+                  📄 {{ latest_resume.filename }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">
+                  uploaded {{ latest_resume.uploaded_at.strftime('%b %d, %Y') if latest_resume.uploaded_at else 'recently' }} &bull; {{ detected_skills|length }} skills identified
+                </div>
+                <div style="margin-top: 0.6rem; display: flex; gap: 0.5rem;">
+                  <a href="{{ url_for('resume.view_resume') }}" class="btn btn-xs btn-outline">view full parsed resume</a>
+                  <a href="{{ url_for('resume.upload_resume_view') }}" class="btn btn-xs btn-secondary">update resume</a>
+                </div>
+              </div>
+            {% else %}
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">no resume uploaded yet.</p>
+              <a href="{{ url_for('resume.upload_resume_view') }}" class="btn btn-sm btn-primary" style="margin-top: 0.5rem;">upload your resume</a>
+            {% endif %}
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="profile-linkedin">linkedin url</label>
-            <input type="url" id="profile-linkedin" name="linkedin" class="form-control" placeholder="https://linkedin.com/in/username" value="{{ user.linkedin or '' }}">
+          <div class="profile-info-block">
+            <span class="profile-info-label">verified technical skills ({{ detected_skills|length }})</span>
+            <div class="skills-chips-wrapper" style="margin-top: 0.5rem;">
+              {% if detected_skills %}
+                {% for skill in detected_skills %}
+                  <span class="skill-tag skill-matched">✓ {{ skill }}</span>
+                {% endfor %}
+              {% else %}
+                <span class="skill-tag">python</span>
+                <span class="skill-tag">javascript</span>
+                <span class="skill-tag">sql</span>
+                <span class="skill-tag">react</span>
+                <span class="skill-tag">git</span>
+              {% endif %}
+            </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="profile-github">github url</label>
-            <input type="url" id="profile-github" name="github" class="form-control" placeholder="https://github.com/username" value="{{ user.github or '' }}">
+          <div class="profile-info-block">
+            <span class="profile-info-label">performance stats</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
+              <div style="padding: 0.75rem; background: var(--bg-surface); border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary);">{{ matches_count }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">roles analyzed</div>
+              </div>
+              <div style="padding: 0.75rem; background: var(--bg-surface); border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-success);">{{ best_match_score }}%</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">top match score</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">profile details & portfolio</h2>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="profile-portfolio">portfolio website</label>
-            <input type="url" id="profile-portfolio" name="portfolio" class="form-control" placeholder="https://yourportfolio.dev" value="{{ user.portfolio or '' }}">
-          </div>
+          <form id="profile-edit-form" method="POST" action="{{ url_for('dashboard.profile_view') }}">
+            <div class="form-group">
+              <label class="form-label" for="profile-name">full name</label>
+              <input type="text" id="profile-name" name="name" class="form-control" value="{{ user.name }}" required>
+            </div>
 
-          <div class="form-group">
-            <label class="form-label" for="profile-career-interests">career interests</label>
-            <textarea id="profile-career-interests" name="career_interests" class="form-control" rows="3" placeholder="e.g. backend engineering, distributed systems, machine learning pipelines">{{ user.career_interests or '' }}</textarea>
-          </div>
+            <div class="form-group">
+              <label class="form-label" for="profile-email">email address</label>
+              <div style="position: relative;">
+                <input type="email" id="profile-email" name="email" class="form-control" value="{{ user.email }}" readonly style="opacity: 0.7; cursor: not-allowed; padding-right: 2.5rem;">
+                <span style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: var(--color-success);" title="verified">🔒</span>
+              </div>
+            </div>
 
-          <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
-            <button type="submit" class="btn btn-primary">save profile</button>
-          </div>
-        </form>
+            <div class="form-group">
+              <label class="form-label" for="profile-interests">target role & career focus</label>
+              <input type="text" id="profile-interests" name="career_interests" class="form-control" placeholder="e.g. full stack developer & backend systems" value="{{ user.career_interests or '' }}">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-location">location</label>
+              <input type="text" id="profile-location" name="location" class="form-control" placeholder="e.g. hyderabad, india / remote" value="{{ user.location or '' }}">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-github">github profile</label>
+              <input type="url" id="profile-github" name="github" class="form-control" placeholder="https://github.com/username" value="{{ user.github or '' }}">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-linkedin">linkedin profile</label>
+              <input type="url" id="profile-linkedin" name="linkedin" class="form-control" placeholder="https://linkedin.com/in/username" value="{{ user.linkedin or '' }}">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-portfolio">portfolio or personal website</label>
+              <input type="url" id="profile-portfolio" name="portfolio" class="form-control" placeholder="https://yourportfolio.dev" value="{{ user.portfolio or '' }}">
+            </div>
+
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+              <button type="submit" class="btn btn-primary">save profile changes</button>
+              <a href="{{ url_for('dashboard.dashboard_view') }}" class="btn btn-secondary">back to dashboard</a>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </main>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

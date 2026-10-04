@@ -56,6 +56,25 @@ SKILL_TAXONOMY = {
         "visual studio code", "pycharm", "figma", "docker desktop", "npm", "pip",
         "vite", "webpack"
     ],
+    "civil engineering": [
+        "civil engineering", "structural engineering", "autocad", "autocad civil 3d",
+        "revit", "staad pro", "etabs", "bim", "surveying", "geotechnical engineering",
+        "concrete technology", "structural analysis", "site engineering",
+        "construction management", "quantity surveying", "estimation", "primavera",
+        "hydraulics", "transportation engineering", "environmental engineering",
+        "foundation design", "steel structures", "bridge engineering"
+    ],
+    "mechanical engineering": [
+        "mechanical engineering", "solidworks", "catia", "ansys", "autocad mechanical",
+        "thermodynamics", "fluid mechanics", "heat transfer", "cnc machining", "gd&t",
+        "finite element analysis", "fea", "cad/cam", "robotics", "mechatronics",
+        "automotive engineering", "manufacturing processes"
+    ],
+    "electrical engineering": [
+        "electrical engineering", "circuit design", "pcb design", "vlsi", "matlab",
+        "simulink", "embedded systems", "microcontrollers", "verilog", "vhdl",
+        "power systems", "plc", "scada", "fpga", "iot"
+    ],
     "soft skills": [
         "communication", "leadership", "problem solving", "teamwork", "adaptability",
         "critical thinking", "collaboration", "agile", "scrum", "project management",
@@ -95,6 +114,17 @@ SYNONYM_MAP = {
     "continuous deployment": "ci/cd",
     "visual studio code": "vs code",
     "structured query language": "sql",
+    "civil": "civil engineering",
+    "civils": "civil engineering",
+    "civil engg": "civil engineering",
+    "structural": "structural engineering",
+    "cad": "autocad",
+    "staad": "staad pro",
+    "mechanical": "mechanical engineering",
+    "mech": "mechanical engineering",
+    "electrical": "electrical engineering",
+    "eee": "electrical engineering",
+    "ece": "electrical engineering",
 }
 
 def normalize_skill(skill):

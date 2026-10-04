@@ -4,85 +4,17 @@
 
 {% block content %}
 <div class="dashboard-layout">
-  <aside class="dashboard-sidebar">
-    <ul class="sidebar-menu">
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.dashboard_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">📊</span>
-          <span>dashboard</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('resume.view_resume') }}" class="sidebar-link">
-          <span class="sidebar-icon">📄</span>
-          <span>my resume</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('matching.job_matcher_view') }}" class="sidebar-link active">
-          <span class="sidebar-icon">⚡</span>
-          <span>job matcher</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('job.jobs_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">💼</span>
-          <span>job search</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('matching.history_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">🕒</span>
-          <span>match history</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.skills_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">🎯</span>
-          <span>skills</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.database_details_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">🗄️</span>
-          <span>database</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.how_it_works_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">💡</span>
-          <span>how it works</span>
-        </a>
-      </li>
-      <div class="sidebar-divider"></div>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.profile_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">👤</span>
-          <span>profile</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('dashboard.settings_view') }}" class="sidebar-link">
-          <span class="sidebar-icon">⚙️</span>
-          <span>settings</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
-          <span class="sidebar-icon">🚪</span>
-          <span>logout</span>
-        </a>
-      </li>
-    </ul>
-  </aside>
+  {% with active_page='matcher' %}
+    {% include "components/sidebar.html" %}
+  {% endwith %}
 
   <main class="dashboard-main">
     <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
       <div>
         <h1 class="dashboard-title">your job match</h1>
         <p class="dashboard-subtitle">
-          target role: <span style="color: #fff; font-weight: 600;">{{ match.job_title }}</span> &bull; 
-          company: <span style="color: #fff; font-weight: 600;">{{ match.company_name }}</span>
+          target role: <span style="color: var(--text-primary); font-weight: 600;">{{ match.job_title }}</span> &bull; 
+          company: <span style="color: var(--text-primary); font-weight: 600;">{{ match.company_name }}</span>
         </p>
       </div>
       <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
@@ -91,6 +23,19 @@
         <a href="{{ url_for('job.jobs_view') }}" class="btn btn-primary">explore all jobs</a>
       </div>
     </div>
+
+    {% if match.overall_score < 25 or 'mismatch' in category %}
+      <div class="domain-mismatch-banner" style="margin-bottom: 1.5rem; padding: 1.25rem; border-radius: 12px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); display: flex; gap: 1rem; align-items: flex-start;">
+        <span style="font-size: 1.8rem; line-height: 1;">⚠️</span>
+        <div style="flex: 1;">
+          <h3 style="color: #ef4444; font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600;">domain mismatch detected</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 0.75rem;">
+            your candidate profile specializes in <strong>computer science & software engineering</strong>, whereas this role requires completely different qualifications. zero core required technical skills were detected.
+          </p>
+          <a href="{{ url_for('job.jobs_view') }}" class="btn btn-sm btn-primary">explore matching cse positions (85%+ fit) &rarr;</a>
+        </div>
+      </div>
+    {% endif %}
 
     <div class="score-display-card">
       <div id="score-circle-indicator" class="score-circle" style="--score-pct: {{ match.overall_score }};">

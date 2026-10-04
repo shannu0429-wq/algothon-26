@@ -107,7 +107,29 @@ def profile_view():
         flash("profile updated successfully.", "success")
         return redirect(url_for("dashboard.profile_view"))
 
-    return render_template("profile.html", user=user)
+    latest_resume = Resume.query.filter_by(user_id=user_id).order_by(Resume.uploaded_at.desc()).first()
+    matches = Match.query.filter_by(user_id=user_id).order_by(Match.created_at.desc()).all()
+    parsed_data = latest_resume.get_parsed_data() if latest_resume else {}
+    detected_skills = parsed_data.get("skills", [])
+    candidate_education = parsed_data.get("education", [])
+    candidate_experience = parsed_data.get("experience", [])
+    best_match_score = max([m.overall_score for m in matches], default=0.0)
+
+    from services.matching_engine import detect_domain
+    cand_domain, _ = detect_domain(detected_skills, latest_resume.extracted_text if latest_resume else "")
+
+    return render_template(
+        "profile.html",
+        user=user,
+        latest_resume=latest_resume,
+        parsed_data=parsed_data,
+        detected_skills=detected_skills,
+        candidate_education=candidate_education,
+        candidate_experience=candidate_experience,
+        matches_count=len(matches),
+        best_match_score=round(best_match_score, 1),
+        candidate_domain=cand_domain
+    )
 
 @dashboard_bp.route("/settings", methods=["GET", "POST"])
 @login_required
@@ -140,50 +162,8 @@ def settings_view():
     return render_template("settings.html", user=user)
 
 @dashboard_bp.route("/database")
-@login_required
 def database_details_view():
-    user_id = session.get("user_id")
-    user = db.session.get(User, user_id)
-
-    user_count = User.query.count()
-    resume_count = Resume.query.count()
-    job_count = Job.query.count()
-    match_count = Match.query.count()
-    skill_count = Skill.query.count()
-
-    recent_users = User.query.order_by(User.created_at.desc()).limit(10).all()
-    recent_resumes = Resume.query.order_by(Resume.uploaded_at.desc()).limit(10).all()
-    recent_jobs = Job.query.order_by(Job.created_at.desc()).limit(10).all()
-    recent_matches = Match.query.order_by(Match.created_at.desc()).limit(10).all()
-
-    from collections import Counter
-    all_skills = Skill.query.all()
-    cat_counts = Counter([s.category for s in all_skills])
-
-    from config import Config
-    db_info = {
-        "host": Config.MYSQL_HOST,
-        "port": Config.MYSQL_PORT,
-        "database": Config.MYSQL_DATABASE,
-        "user": Config.MYSQL_USER,
-        "driver": "mysql+pymysql"
-    }
-
-    return render_template(
-        "database.html",
-        user=user,
-        db_info=db_info,
-        user_count=user_count,
-        resume_count=resume_count,
-        job_count=job_count,
-        match_count=match_count,
-        skill_count=skill_count,
-        recent_users=recent_users,
-        recent_resumes=recent_resumes,
-        recent_jobs=recent_jobs,
-        recent_matches=recent_matches,
-        cat_counts=cat_counts.most_common()
-    )
+    return redirect(url_for("dashboard.dashboard_view"))
 
 @dashboard_bp.route("/how-it-works")
 def how_it_works_view():
