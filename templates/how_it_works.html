@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}how it works — jobalign ai{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem; max-width: 1000px;">
+  <div style="text-align: center; margin-bottom: 3.5rem;">
+    <div class="hero-tagline" style="display: inline-flex; margin-bottom: 0.75rem;">
+      <span>✦</span>
+      <span>ai matching pipeline & architecture</span>
+    </div>
+    <h1 class="hero-heading" style="font-size: 2.6rem; margin-bottom: 1rem;">
+      how <span>jobalign ai</span> works
+    </h1>
+    <p class="hero-desc" style="max-width: 680px; margin: 0 auto; font-size: 1.05rem;">
+      a transparent, multi-signal ai system designed to understand your true technical capabilities, evaluate job requirements, and explain match scores with zero guesswork.
+    </p>
+  </div>
+
+  <div class="flow-diagram-container" style="margin-bottom: 3.5rem;">
+    <div class="flow-diagram">
+      <div class="flow-step">
+        <div class="flow-icon-circle">📄</div>
+        <span class="flow-label">1. resume</span>
+      </div>
+      <div class="flow-arrow">➔</div>
+      <div class="flow-step">
+        <div class="flow-icon-circle">🧠</div>
+        <span class="flow-label">2. nlp extraction</span>
+      </div>
+      <div class="flow-arrow">➔</div>
+      <div class="flow-step">
+        <div class="flow-icon-circle">💼</div>
+        <span class="flow-label">3. job analysis</span>
+      </div>
+      <div class="flow-arrow">➔</div>
+      <div class="flow-step">
+        <div class="flow-icon-circle">⚡</div>
+        <span class="flow-label">4. multi-signal match</span>
+      </div>
+      <div class="flow-arrow">➔</div>
+      <div class="flow-step">
+        <div class="flow-icon-circle">🎯</div>
+        <span class="flow-label">5. score & insights</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 2rem; margin-bottom: 3.5rem;">
+    <div class="panel" style="border-left: 4px solid var(--primary-light);">
+      <div style="display: flex; align-items: flex-start; gap: 1.25rem;">
+        <div style="background: rgba(99, 102, 241, 0.15); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; color: #a5b4fc; flex-shrink: 0;">
+          1
+        </div>
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;">
+            step 1: document upload & text extraction
+          </h2>
+          <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0.75rem;">
+            you upload your resume in any format — pdf, docx, txt, or image files (png, jpg, jpeg). our document ingestion pipeline handles multi-column layouts, tables, and unconventional styling with tesseract ocr fallback for scanned documents.
+          </p>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <span class="meta-pill">pdf parsing</span>
+            <span class="meta-pill">docx extraction</span>
+            <span class="meta-pill">ocr image processing</span>
+            <span class="meta-pill">layout noise removal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="border-left: 4px solid var(--success);">
+      <div style="display: flex; align-items: flex-start; gap: 1.25rem;">
+        <div style="background: rgba(16, 185, 129, 0.15); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; color: #6ee7b7; flex-shrink: 0;">
+          2
+        </div>
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;">
+            step 2: deep semantic resume understanding
+          </h2>
+          <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0.75rem;">
+            our nlp engine parses your resume into structured sections: contact information, education, career experience, personal projects, and certifications. technical skills are normalized using our 178+ skill taxonomy (e.g. converting "js" to "javascript", "k8s" to "kubernetes", or "ml" to "machine learning").
+          </p>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <span class="meta-pill">personal information</span>
+            <span class="meta-pill">education history</span>
+            <span class="meta-pill">work experience</span>
+            <span class="meta-pill">178+ skill taxonomy</span>
+            <span class="meta-pill">synonym normalization</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="border-left: 4px solid var(--warning);">
+      <div style="display: flex; align-items: flex-start; gap: 1.25rem;">
+        <div style="background: rgba(245, 158, 11, 0.15); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; color: #fde68a; flex-shrink: 0;">
+          3
+        </div>
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;">
+            step 3: job requirement analysis
+          </h2>
+          <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0.75rem;">
+            choose an active role from our platform database or paste any external job posting from linkedin or indeed. jobalign ai extracts the core role requirements, separates must-have required skills from preferred skills, and establishes experience benchmarks.
+          </p>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <span class="meta-pill">required skills isolation</span>
+            <span class="meta-pill">preferred skills detection</span>
+            <span class="meta-pill">experience duration target</span>
+            <span class="meta-pill">education level target</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="border-left: 4px solid #38bdf8;">
+      <div style="display: flex; align-items: flex-start; gap: 1.25rem;">
+        <div style="background: rgba(56, 189, 248, 0.15); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; color: #7dd3fc; flex-shrink: 0;">
+          4
+        </div>
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;">
+            step 4: multi-signal compatibility scoring
+          </h2>
+          <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
+            rather than a naive keyword count, jobalign ai computes an objective weighted score across 5 essential dimensions of job fit:
+          </p>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem;">
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <div style="font-weight: 700; color: #fff; font-size: 0.92rem;">skills match (40%)</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">overlap with core technical requirements</div>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <div style="font-weight: 700; color: #fff; font-size: 0.92rem;">experience fit (20%)</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">years of experience and seniority level</div>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <div style="font-weight: 700; color: #fff; font-size: 0.92rem;">semantic fit (20%)</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">cosine similarity of dense embeddings</div>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <div style="font-weight: 700; color: #fff; font-size: 0.92rem;">education fit (10%)</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">degree level and field alignment</div>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <div style="font-weight: 700; color: #fff; font-size: 0.92rem;">project relevance (10%)</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">project technical stack relevance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="border-left: 4px solid #ec4899;">
+      <div style="display: flex; align-items: flex-start; gap: 1.25rem;">
+        <div style="background: rgba(236, 72, 153, 0.15); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; color: #f472b6; flex-shrink: 0;">
+          5
+        </div>
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;">
+            step 5: explainable results & actionable recommendations
+          </h2>
+          <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0.75rem;">
+            you receive a complete breakdown: matched skills highlighted in green, missing skills identified in amber, partial matches with reasoning, and specific recommendations on what skills or projects to add to maximize your chances.
+          </p>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <span class="skill-tag matched">✓ matched skills</span>
+            <span class="skill-tag missing">○ missing skills</span>
+            <span class="meta-pill">partial match reasoning</span>
+            <span class="meta-pill">ats improvement advice</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; background: rgba(15, 23, 42, 0.8);">
+    <h2 class="card-title" style="font-size: 1.4rem; margin-bottom: 0.5rem;">ready to analyze your resume?</h2>
+    <p class="card-desc" style="max-width: 520px; margin: 0 auto 1.5rem;">
+      experience the intelligent matching engine live. upload your resume or test with our preloaded candidate profile.
+    </p>
+    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+      <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">upload resume</a>
+      <a href="{{ url_for('auth.demo_login') }}" class="btn btn-accent">1-click demo candidate</a>
+      <a href="{{ url_for('job.jobs_view') }}" class="btn btn-secondary">explore all jobs</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

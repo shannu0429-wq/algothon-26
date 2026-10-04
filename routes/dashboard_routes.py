@@ -184,3 +184,9 @@ def database_details_view():
         recent_matches=recent_matches,
         cat_counts=cat_counts.most_common()
     )
+
+@dashboard_bp.route("/how-it-works")
+def how_it_works_view():
+    user_id = session.get("user_id")
+    user = db.session.get(User, user_id) if user_id else None
+    return render_template("how_it_works.html", user=user)

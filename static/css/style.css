@@ -787,14 +787,6 @@ textarea.form-control {
   color: #fff;
 }
 
-.judge-banner {
-  background: linear-gradient(90deg, #1e1b4b 0%, #0f172a 100%);
-  border-bottom: 1px solid rgba(245, 158, 11, 0.35);
-  padding: 0.3rem 1rem;
-  font-size: 0.8rem;
-  z-index: 1001;
-}
-
 .btn-xs {
   font-size: 0.74rem;
   padding: 0.2rem 0.55rem;
